@@ -131,7 +131,7 @@ public class Overlay extends Thread {
 		}
 	}
 
-	public void removeOverlay() {
-		overlayFrame.setVisible(false);
+	public void toggleOverlay() {
+		overlayFrame.setVisible(!overlayFrame.isVisible());
 	}
 }

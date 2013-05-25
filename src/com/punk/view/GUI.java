@@ -53,8 +53,7 @@ public class GUI {
 					overlay = new Overlay(capUtil, Border.EB);
 					overlay.start();
 				} else {
-					overlay.removeOverlay();
-					overlay = null;
+					overlay.toggleOverlay();
 				}
 			}
 		});
