@@ -81,7 +81,7 @@ public class Capturepoint {
 
 	public void flip(Color server) {
 		this.server = server;
-		riTime = 300 + riBufferTime;
+		riTime = 300 - riBufferTime;
 	}
 
 	private void createOverlay() {
