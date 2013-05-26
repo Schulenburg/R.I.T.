@@ -96,23 +96,35 @@ public class Overlay extends Thread {
 				cap.tickRit();
 			}
 
-			for (Capturepoint cap : capUtil.getCapturepoints(border)) {
-				if (cap.getServer() != Color.GRAY && cap.getRiTime() > 0 || showAll) {
-					cap.getOverlay().setVisible(true);
-				} else {
-                    cap.getOverlay().setVisible(false);
-				}
-			}
-			overlayFrame.repaint();
+            updateCapturePoints();
 		}
 	}
 
-	public void setShowAll(boolean showAll) {
-		this.showAll = showAll;
-	}
+    private boolean requestOnTop = false;
 
-	public boolean getShowAll() {
-		return showAll;
+    private void updateCapturePoints() {
+        for (Capturepoint cap : capUtil.getCapturepoints(border)) {
+            if (cap.getServer() != Color.GRAY && cap.getRiTime() > 0 || showAll) {
+                cap.getOverlay().setVisible(true);
+            } else {
+                cap.getOverlay().setVisible(false);
+            }
+        }
+        if (requestOnTop) {
+            overlayFrame.setFocusableWindowState(false);
+            overlayFrame.setVisible(true);
+        } else {
+            overlayFrame.setFocusableWindowState(true);
+        }
+        overlayFrame.repaint();
+
+        requestOnTop = !requestOnTop;
+    }
+
+	public void toggleShowAll() {
+		this.showAll = !showAll;
+
+        updateCapturePoints();
 	}
 
 	public void run() {

@@ -78,7 +78,7 @@ public class GUI {
 		checkBoxShowAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (overlay != null) {
-					overlay.setShowAll(!overlay.getShowAll());
+					overlay.toggleShowAll();
 				}
 			}
 		});
