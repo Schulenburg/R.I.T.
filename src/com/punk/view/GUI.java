@@ -26,10 +26,11 @@ public class GUI {
 	private JButton btnOverlayWvw;
 	private JComboBox<Border> comboBoxBorder;
 	private JCheckBox checkBoxShowAll;
+	private JCheckBox checkBoxAlwaysOnTop;
 
 	public GUI(CapturepointsUtil capUtil) {
 		frame = new JFrame("R.I.T.");
-		frame.setLayout(new GridLayout(0, 3));
+		frame.setLayout(new GridLayout(0, 4));
 		frame.setSize(600, 60);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -43,10 +44,12 @@ public class GUI {
 		btnOverlayWvw = new JButton("Show overlay");
 		comboBoxBorder = new JComboBox<Border>(comboBorderArray);
 		checkBoxShowAll = new JCheckBox("Show all", true);
+        checkBoxAlwaysOnTop = new JCheckBox("Always On Top", true);
 
 		frame.add(btnOverlayWvw);
 		frame.add(comboBoxBorder);
 		frame.add(checkBoxShowAll);
+		frame.add(checkBoxAlwaysOnTop);
 
 		btnOverlayWvw.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -76,6 +79,14 @@ public class GUI {
 			public void actionPerformed(ActionEvent e) {
 				if (overlay != null) {
 					overlay.setShowAll(!overlay.getShowAll());
+				}
+			}
+		});
+
+        checkBoxAlwaysOnTop.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (overlay != null) {
+					overlay.toggleAlwaysOnTop();
 				}
 			}
 		});

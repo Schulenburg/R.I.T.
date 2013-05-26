@@ -1,5 +1,6 @@
 package com.punk.start;
 
+import com.punk.model.Capturepoint;
 import jGW2API.jGW2API;
 
 import java.awt.Color;
@@ -147,13 +148,13 @@ public class Start {
 
 	private static Color getColor(String name) {
 		switch (name) {
-		case "Red":
-			return Color.RED;
-		case "Green":
-			return Color.GREEN;
-		case "Blue":
-			return Color.BLUE;
+            case "Red":
+                return Capturepoint.RED;
+            case "Green":
+                return Capturepoint.GREEN;
+            case "Blue":
+                return Capturepoint.BLUE;
 		}
-		return Color.GRAY;
+		return Capturepoint.GRAY;
 	}
 }

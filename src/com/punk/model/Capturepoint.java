@@ -1,5 +1,7 @@
 package com.punk.model;
 
+import com.punk.view.RichJLabel;
+
 import java.awt.Color;
 
 import javax.swing.JLabel;
@@ -9,6 +11,10 @@ import javax.swing.JPanel;
  * @author Sander Schulenburg aka "Much"(schulenburgsander@gmail.com)
  */
 public class Capturepoint {
+    public static final Color RED = new Color(242, 109, 125);
+    public static final Color BLUE = new Color(0, 174, 239);
+    public static final Color GREEN = new Color(141, 198, 63);
+    public static final Color GRAY = new Color(149, 149, 149);
 
 	private int id;
 	private String name;
@@ -19,8 +25,8 @@ public class Capturepoint {
 	private boolean initialized = false;
 
 	private JPanel panelOverlay = null;
-	private JLabel labelOverlayName = null;
-	private JLabel labelOverlayTimer = null;
+	private RichJLabel labelOverlayName = null;
+	private RichJLabel labelOverlayTimer = null;
 
 	public Capturepoint(int id, String name, int points) {
 		this.id = id;
@@ -88,12 +94,14 @@ public class Capturepoint {
 		panelOverlay = new JPanel();
 		panelOverlay.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
 
-		labelOverlayName = new JLabel(name);
+		labelOverlayName = new RichJLabel(name, 1);
 		labelOverlayName.setForeground(server);
+        labelOverlayName.setRightShadow(1, 1, Color.BLACK);
 		panelOverlay.add(labelOverlayName);
 
-		labelOverlayTimer = new JLabel(getTimeAsString(riTime));
+		labelOverlayTimer = new RichJLabel(getTimeAsString(riTime), 1);
 		labelOverlayTimer.setForeground(server);
+        labelOverlayTimer.setRightShadow(1, 1, Color.BLACK);
 		panelOverlay.add(labelOverlayTimer);
 
 		panelOverlay.setVisible(true);
@@ -101,11 +109,11 @@ public class Capturepoint {
 
 	@SuppressWarnings("unused")
 	private String getColorName(Color server) {
-		if (server.equals(Color.RED)) {
+		if (server.equals(Capturepoint.RED)) {
 			return "Red";
-		} else if (server.equals(Color.BLUE)) {
+		} else if (server.equals(Capturepoint.BLUE)) {
 			return "Blue";
-		} else if (server.equals(Color.GREEN)) {
+		} else if (server.equals(Capturepoint.GREEN)) {
 			return "Green";
 		} else {
 			return "Gray";

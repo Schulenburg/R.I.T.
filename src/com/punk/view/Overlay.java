@@ -48,7 +48,6 @@ public class Overlay extends Thread {
 		overlayFrame.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
 		overlayFrame.setLocation((int) screenSize.getWidth() - width,
 				(int) screenSize.getHeight() - height - 20);
-
 		overlayFrame.setVisible(true);
 
 		changeBorder();
@@ -81,7 +80,6 @@ public class Overlay extends Thread {
 
 	private class updateTimers extends TimerTask {
 		public void run() {
-
 			for (Capturepoint cap : capUtil.getCapturepoints(Border.RED)) {
 				cap.tickRit();
 			}
@@ -99,13 +97,10 @@ public class Overlay extends Thread {
 			}
 
 			for (Capturepoint cap : capUtil.getCapturepoints(border)) {
-				if (cap.getServer() != Color.GRAY && cap.getRiTime() > 0
-						|| showAll) {
+				if (cap.getServer() != Color.GRAY && cap.getRiTime() > 0 || showAll) {
 					cap.getOverlay().setVisible(true);
 				} else {
-					if (!showAll) {
-						cap.getOverlay().setVisible(false);
-					}
+                    cap.getOverlay().setVisible(false);
 				}
 			}
 			overlayFrame.repaint();
@@ -145,4 +140,8 @@ public class Overlay extends Thread {
 	public void toggleOverlay() {
 		overlayFrame.setVisible(!overlayFrame.isVisible());
 	}
+
+    public void toggleAlwaysOnTop() {
+        overlayFrame.setAlwaysOnTop(!overlayFrame.isAlwaysOnTop());
+    }
 }
