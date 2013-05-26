@@ -23,11 +23,12 @@ import com.punk.model.CapturepointsUtil;
 public class Overlay extends Thread {
 
 	private JFrame overlayFrame = null;
-	private int width = 350;
-	private int height = 400;
+	private int width = 400;
+	private int height = 350;
 
 	private CapturepointsUtil capUtil = null;
 	private Border border = null;
+	private boolean showAll = true;
 
 	Timer timer = null;
 
@@ -35,11 +36,10 @@ public class Overlay extends Thread {
 		this.capUtil = capUtil;
 		this.border = border;
 
-		GridLayout gridLayout = new GridLayout(0, 2);
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
 		overlayFrame = new JFrame();
-		overlayFrame.setLayout(gridLayout);
+		overlayFrame.setLayout(new GridLayout(0, 2));
 		overlayFrame.setUndecorated(true);
 		overlayFrame.setSize(0, 0);
 		overlayFrame.setLocationRelativeTo(null);
@@ -51,21 +51,10 @@ public class Overlay extends Thread {
 
 		overlayFrame.setVisible(true);
 
-		updateBorder();
+		changeBorder();
 
 		timer = new Timer();
 		timer.schedule(new updateTimers(), 0, 1000);
-	}
-
-	private void updateBorder() {
-		for (int index = 0; index < capUtil.getCapturepoints(border).size(); index++) {
-			Capturepoint cap = capUtil.getCapturepoints(border).get(index);
-			if (cap.getServer() != Color.GRAY && cap.getRiTime() > 0) {
-				overlayFrame.add(cap.getOverlay());
-			} else {
-				cap.setRiTime(10);
-			}
-		}
 	}
 
 	public void setBorder(Border border) {
@@ -76,7 +65,17 @@ public class Overlay extends Thread {
 		}
 		if (this.border != border) {
 			this.border = border;
-			updateBorder();
+			changeBorder();
+		}
+	}
+
+	private void changeBorder() {
+		for (int index = 0; index < capUtil.getCapturepoints(border).size(); index++) {
+			Capturepoint cap = capUtil.getCapturepoints(border).get(index);
+			if ((cap.getServer() != Color.GRAY && cap.getRiTime() > 0)
+					|| showAll) {
+				overlayFrame.add(cap.getOverlay());
+			}
 		}
 	}
 
@@ -100,33 +99,45 @@ public class Overlay extends Thread {
 			}
 
 			for (Capturepoint cap : capUtil.getCapturepoints(border)) {
-				if (cap.getServer() != Color.GRAY && cap.getRiTime() > 0) {
-					overlayFrame.add(cap.getOverlay());
+				if (cap.getServer() != Color.GRAY && cap.getRiTime() > 0
+						|| showAll) {
+					cap.getOverlay().setVisible(true);
 				} else {
-					overlayFrame.remove(cap.getOverlay());
+					if (!showAll) {
+						cap.getOverlay().setVisible(false);
+					}
 				}
 			}
 			overlayFrame.repaint();
 		}
 	}
 
+	public void setShowAll(boolean showAll) {
+		this.showAll = showAll;
+	}
+
+	public boolean getShowAll() {
+		return showAll;
+	}
+
 	public void run() {
-		while (overlayFrame.isVisible()) {
+		while (overlayFrame != null) {
+			if (overlayFrame.isVisible()) {
+				PointerInfo a = MouseInfo.getPointerInfo();
+				Point b = a.getLocation();
+				int x = (int) b.getX();
+				int y = (int) b.getY();
 
-			PointerInfo a = MouseInfo.getPointerInfo();
-			Point b = a.getLocation();
-			int x = (int) b.getX();
-			int y = (int) b.getY();
+				boolean isMouseOnOverlay = x > overlayFrame.getLocation().x
+						&& x < overlayFrame.getLocation().x + width
+						&& y > overlayFrame.getLocation().y
+						&& y < overlayFrame.getLocation().y + height;
 
-			boolean isMouseOnOverlay = x > overlayFrame.getLocation().x
-					&& x < overlayFrame.getLocation().x + width
-					&& y > overlayFrame.getLocation().y
-					&& y < overlayFrame.getLocation().y + height;
-
-			if (isMouseOnOverlay) {
-				overlayFrame.setSize(0, 0);
-			} else {
-				overlayFrame.setSize(width, height);
+				if (isMouseOnOverlay) {
+					overlayFrame.setSize(0, 0);
+				} else {
+					overlayFrame.setSize(width, height);
+				}
 			}
 		}
 	}

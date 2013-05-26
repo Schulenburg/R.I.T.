@@ -1,12 +1,13 @@
 package com.punk.view;
 
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JMenuBar;
 
 import com.punk.model.Border;
 import com.punk.model.CapturepointsUtil;
@@ -22,9 +23,14 @@ public class GUI {
 	private Border[] comboBorderArray = { Border.EB, Border.RED, Border.GREEN,
 			Border.BLUE };
 
+	private JButton btnOverlayWvw;
+	private JComboBox<Border> comboBoxBorder;
+	private JCheckBox checkBoxShowAll;
+
 	public GUI(CapturepointsUtil capUtil) {
 		frame = new JFrame("R.I.T.");
-		frame.setSize(300, 60);
+		frame.setLayout(new GridLayout(0, 3));
+		frame.setSize(600, 60);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		this.capUtil = capUtil;
@@ -34,20 +40,15 @@ public class GUI {
 	}
 
 	private void addMenu(JFrame frame) {
-		JMenuBar menuBar = new JMenuBar();
+		btnOverlayWvw = new JButton("Show overlay");
+		comboBoxBorder = new JComboBox<Border>(comboBorderArray);
+		checkBoxShowAll = new JCheckBox("Show all", true);
 
-		JButton btnOverlay = new JButton("Show overlay");
+		frame.add(btnOverlayWvw);
+		frame.add(comboBoxBorder);
+		frame.add(checkBoxShowAll);
 
-		final JComboBox<Border> comboBorderBox = new JComboBox<Border>(
-				comboBorderArray);
-
-		menuBar.add(btnOverlay);
-		menuBar.add(comboBorderBox);
-		frame.setJMenuBar(menuBar);
-
-		btnOverlay.addActionListener(new ActionListener() {
-
-			@Override
+		btnOverlayWvw.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (overlay == null) {
 					overlay = new Overlay(capUtil, Border.EB);
@@ -55,14 +56,26 @@ public class GUI {
 				} else {
 					overlay.toggleOverlay();
 				}
+				if (btnOverlayWvw.getText().startsWith("Show")) {
+					btnOverlayWvw.setText("Hide overlay");
+				} else {
+					btnOverlayWvw.setText("Show overlay");
+				}
 			}
 		});
 
-		comboBorderBox.addActionListener(new ActionListener() {
-
+		comboBoxBorder.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (overlay != null) {
-					overlay.setBorder((Border) comboBorderBox.getSelectedItem());
+					overlay.setBorder((Border) comboBoxBorder.getSelectedItem());
+				}
+			}
+		});
+
+		checkBoxShowAll.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (overlay != null) {
+					overlay.setShowAll(!overlay.getShowAll());
 				}
 			}
 		});

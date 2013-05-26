@@ -14,9 +14,8 @@ public class Capturepoint {
 	private String name;
 	private int points;
 	private Color server;
-
 	private int riTime;
-
+	private final int riBufferTime = 8;
 	private boolean initialized = false;
 
 	private JPanel panelOverlay = null;
@@ -82,7 +81,7 @@ public class Capturepoint {
 
 	public void flip(Color server) {
 		this.server = server;
-		riTime = 300;
+		riTime = 300 + riBufferTime;
 	}
 
 	private void createOverlay() {
@@ -118,6 +117,9 @@ public class Capturepoint {
 	}
 
 	private String getTimeAsString(int time) {
+		if (time == 0) {
+			return "";
+		}
 		int seconds = time % 60;
 		int minutes = time / 60;
 		if (seconds < 10) {
