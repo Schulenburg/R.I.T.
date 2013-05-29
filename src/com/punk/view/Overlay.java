@@ -1,17 +1,11 @@
 package com.punk.view;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.PointerInfo;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.swing.JFrame;
+import javax.swing.*;
 
 import com.punk.model.Border;
 import com.punk.model.Capturepoint;
@@ -22,61 +16,159 @@ import com.punk.model.CapturepointsUtil;
  */
 public class Overlay extends Thread {
 
+    public enum Type {
+        Text, Icons
+    }
+
+    public enum Size {
+        VERY_SMALL, SMALL, MEDIUM, LARGE
+    }
+
+    private SpringLayout overlayFrameSpringLayout = null;
 	private JFrame overlayFrame = null;
-	private int width = 400;
-	private int height = 350;
 
 	private CapturepointsUtil capUtil = null;
 	private Border border = null;
+    private Overlay.Type type = null;
+    private Overlay.Size size = null;
 	private boolean showAll = true;
+	private boolean showNames = true;
 
 	Timer timer = null;
 
-	public Overlay(CapturepointsUtil capUtil, Border border) {
+	public Overlay(CapturepointsUtil capUtil, Border border, Overlay.Type type, Overlay.Size size) {
 		this.capUtil = capUtil;
 		this.border = border;
+        this.type = type;
+        this.size = size;
 
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        overlayFrameSpringLayout = new SpringLayout();
 
 		overlayFrame = new JFrame();
-		overlayFrame.setLayout(new GridLayout(0, 2));
+        overlayFrame.setLayout(overlayFrameSpringLayout);
 		overlayFrame.setUndecorated(true);
 		overlayFrame.setSize(0, 0);
 		overlayFrame.setLocationRelativeTo(null);
 		overlayFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		overlayFrame.setAlwaysOnTop(true);
 		overlayFrame.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
-		overlayFrame.setLocation((int) screenSize.getWidth() - width,
-				(int) screenSize.getHeight() - height - 20);
-		overlayFrame.setVisible(true);
+		applyPosition();
+		overlayFrame.setVisible(false);
 
-		changeBorder();
+		updateOverlayFrame();
 
 		timer = new Timer();
 		timer.schedule(new updateTimers(), 0, 1000);
 	}
 
+    private void applyPosition() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        overlayFrame.setLocation((int)screenSize.getWidth() - getWidth(), (int)screenSize.getHeight() - getHeight() - 20);
+        overlayFrame.setSize(getWidth(), getHeight());
+    }
+
+    private int getWidth() {
+        return (int)(550 * getSizeMultiplier());
+    }
+
+    private int getHeight() {
+        switch (border) {
+            case EB:
+                return (int)(500 * getSizeMultiplier());
+
+            default:
+                return (int)(680 * getSizeMultiplier());
+        }
+    }
+
+    private double getSizeMultiplier() {
+        double sizeMultiplier = 1;
+        switch (size) {
+            case VERY_SMALL:
+                sizeMultiplier = 0.33;
+                break;
+
+            case SMALL:
+                sizeMultiplier = 0.5;
+                break;
+
+            case MEDIUM:
+                sizeMultiplier = 0.66;
+                break;
+
+            case LARGE:
+                sizeMultiplier = 1;
+                break;
+        }
+        return sizeMultiplier;
+    }
+
 	public void setBorder(Border border) {
-		ArrayList<Capturepoint> capturepoints = capUtil
-				.getCapturepoints(this.border);
-		for (int index = 0; index < capturepoints.size(); index++) {
-			overlayFrame.remove(capturepoints.get(index).getOverlay());
-		}
-		if (this.border != border) {
-			this.border = border;
-			changeBorder();
-		}
+        clearOverlayFrame();
+
+        this.border = border;
+
+        updateOverlayFrame();
 	}
 
-	private void changeBorder() {
-		for (int index = 0; index < capUtil.getCapturepoints(border).size(); index++) {
-			Capturepoint cap = capUtil.getCapturepoints(border).get(index);
-			if ((cap.getServer() != Color.GRAY && cap.getRiTime() > 0)
-					|| showAll) {
-				overlayFrame.add(cap.getOverlay());
+    private void clearOverlayFrame() {
+        ArrayList<Capturepoint> capturepoints = capUtil.getCapturepoints(this.border);
+        for (Capturepoint capturepoint : capturepoints) {
+            overlayFrame.remove(capturepoint.getOverlay());
+        }
+    }
+
+	private void updateOverlayFrame() {
+        double sizeMultiplier = getSizeMultiplier();
+
+        ArrayList<Capturepoint> capturepoints = capUtil.getCapturepoints(this.border);
+        for (Capturepoint capturepoint : capturepoints) {
+			if ((capturepoint.getServer() != Color.GRAY && capturepoint.getRiTime() > 0) || showAll) {
+                capturepoint.createOverlay(type, showNames);
+                JPanel overlay = capturepoint.getOverlay();
+
+				overlayFrame.add(overlay);
+
+                switch (type) {
+                    case Icons:
+                        overlayFrameSpringLayout.putConstraint(SpringLayout.WEST, overlay, (int) ((double) capturepoint.getTop() * sizeMultiplier), SpringLayout.WEST, overlayFrame);
+                        overlayFrameSpringLayout.putConstraint(SpringLayout.NORTH, overlay, (int) ((double) capturepoint.getLeft() * sizeMultiplier), SpringLayout.NORTH, overlayFrame);
+                        break;
+                }
 			}
 		}
+
+        applyPosition();
+
+        overlayFrame.repaint();
 	}
+
+    public void setSize(Size size) {
+        clearOverlayFrame();
+
+        this.size = size;
+
+        updateOverlayFrame();
+    }
+
+    public void setType(Type type) {
+        clearOverlayFrame();
+
+        this.type = type;
+
+        switch (type) {
+            case Icons:
+                overlayFrame.setLayout(overlayFrameSpringLayout);
+                break;
+
+            case Text:
+                overlayFrame.setLayout(new GridLayout(0, 2));
+                break;
+        }
+
+        updateOverlayFrame();
+    }
 
 	private class updateTimers extends TimerTask {
 		public void run() {
@@ -110,6 +202,8 @@ public class Overlay extends Thread {
                 cap.getOverlay().setVisible(false);
             }
         }
+        if (!overlayFrame.isVisible()) return;
+
         if (requestOnTop) {
             overlayFrame.setFocusableWindowState(false);
             overlayFrame.setVisible(true);
@@ -136,18 +230,28 @@ public class Overlay extends Thread {
 				int y = (int) b.getY();
 
 				boolean isMouseOnOverlay = x > overlayFrame.getLocation().x
-						&& x < overlayFrame.getLocation().x + width
+						&& x < overlayFrame.getLocation().x + getWidth()
 						&& y > overlayFrame.getLocation().y
-						&& y < overlayFrame.getLocation().y + height;
+						&& y < overlayFrame.getLocation().y + getHeight();
 
 				if (isMouseOnOverlay) {
 					overlayFrame.setSize(0, 0);
 				} else {
-					overlayFrame.setSize(width, height);
+					overlayFrame.setSize(getWidth(), getHeight());
 				}
-			}
+			} else {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ignore) {
+                    ignore.printStackTrace();
+                }
+            }
 		}
 	}
+
+    public boolean isVisible() {
+        return overlayFrame.isVisible();
+    }
 
 	public void toggleOverlay() {
 		overlayFrame.setVisible(!overlayFrame.isVisible());
@@ -155,5 +259,13 @@ public class Overlay extends Thread {
 
     public void toggleAlwaysOnTop() {
         overlayFrame.setAlwaysOnTop(!overlayFrame.isAlwaysOnTop());
+    }
+
+    public void toggleShowNames() {
+        clearOverlayFrame();
+
+        showNames = !showNames;
+
+        updateOverlayFrame();
     }
 }

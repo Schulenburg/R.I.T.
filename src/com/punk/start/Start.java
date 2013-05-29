@@ -1,6 +1,7 @@
 package com.punk.start;
 
 import com.punk.model.Capturepoint;
+import com.punk.resources.Resources;
 import jGW2API.jGW2API;
 
 import java.awt.Color;
@@ -35,8 +36,9 @@ public class Start {
 	 * @throws JSONException
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		capUtil = new CapturepointsUtil();
+        Resources.load();
+
+        capUtil = new CapturepointsUtil();
 
 		findServer(SERVERNAME);
 		findmatch(id);

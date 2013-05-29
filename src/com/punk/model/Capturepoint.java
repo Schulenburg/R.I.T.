@@ -1,11 +1,12 @@
 package com.punk.model;
 
+import com.punk.resources.Resources;
+import com.punk.view.Overlay;
 import com.punk.view.RichJLabel;
 
-import java.awt.Color;
+import java.awt.*;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 /**
  * @author Sander Schulenburg aka "Much"(schulenburgsander@gmail.com)
@@ -16,26 +17,35 @@ public class Capturepoint {
     public static final Color GREEN = new Color(141, 198, 63);
     public static final Color GRAY = new Color(149, 149, 149);
 
+    public enum Type {
+        Castle, Keep, Tower, Camp
+    }
+
 	private int id;
 	private String name;
 	private int points;
+    private Type type;
+    private Point location;
+
 	private Color server;
 	private int riTime;
 	private final int riBufferTime = 8;
 	private boolean initialized = false;
 
 	private JPanel panelOverlay = null;
+	private JLabel labelOverlayIcon = null;
 	private RichJLabel labelOverlayName = null;
 	private RichJLabel labelOverlayTimer = null;
 
-	public Capturepoint(int id, String name, int points) {
+	public Capturepoint(int id, String name, int points, Type type, Point location) {
 		this.id = id;
 		this.name = name;
 		this.points = points;
+        this.type = type;
+        this.location = location;
+
 		server = Color.GRAY;
 		riTime = 0;
-
-		createOverlay();
 	}
 
 	public int getId() {
@@ -67,6 +77,8 @@ public class Capturepoint {
 	}
 
 	public void tickRit() {
+        if (panelOverlay == null) return;
+
 		if (riTime > 0) {
 			riTime = riTime - 1;
 		}
@@ -74,8 +86,87 @@ public class Capturepoint {
 		if (labelOverlayName.getForeground() != server) {
 			labelOverlayTimer.setForeground(server);
 			labelOverlayName.setForeground(server);
+            if (labelOverlayIcon != null) {
+                changeIcon();
+            }
 		}
 	}
+
+    private void changeIcon() {
+        if (server.equals(Capturepoint.RED)) {
+            switch (type) {
+                case Castle:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_CASTLE_RED);
+                    break;
+
+                case Keep:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_KEEP_RED);
+                    break;
+
+                case Tower:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_TOWER_RED);
+                    break;
+
+                case Camp:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_CAMP_RED);
+                    break;
+            }
+        } else if (server.equals(Capturepoint.BLUE)) {
+            switch (type) {
+                case Castle:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_CASTLE_BLUE);
+                    break;
+
+                case Keep:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_KEEP_BLUE);
+                    break;
+
+                case Tower:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_TOWER_BLUE);
+                    break;
+
+                case Camp:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_CAMP_BLUE);
+                    break;
+            }
+        } else if (server.equals(Capturepoint.GREEN)) {
+            switch (type) {
+                case Castle:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_CASTLE_GREEN);
+                    break;
+
+                case Keep:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_KEEP_GREEN);
+                    break;
+
+                case Tower:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_TOWER_GREEN);
+                    break;
+
+                case Camp:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_CAMP_GREEN);
+                    break;
+            }
+        } else {
+            switch (type) {
+                case Castle:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_CASTLE_NEUTRAL);
+                    break;
+
+                case Keep:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_KEEP_NEUTRAL);
+                    break;
+
+                case Tower:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_TOWER_NEUTRAL);
+                    break;
+
+                case Camp:
+                    labelOverlayIcon.setIcon(Resources.IMAGE_CAMP_NEUTRAL);
+                    break;
+            }
+        }
+    }
 
 	public boolean getInitialized() {
 		return initialized;
@@ -90,19 +181,51 @@ public class Capturepoint {
 		riTime = 300 - riBufferTime;
 	}
 
-	private void createOverlay() {
+	public void createOverlay(Overlay.Type type, boolean showNames) {
 		panelOverlay = new JPanel();
 		panelOverlay.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
 
-		labelOverlayName = new RichJLabel(name, 1);
-		labelOverlayName.setForeground(server);
-        labelOverlayName.setRightShadow(1, 1, Color.BLACK);
-		panelOverlay.add(labelOverlayName);
+        switch (type) {
+            case Icons:
+                panelOverlay.setLayout(new GridBagLayout());
+                GridBagConstraints c = new GridBagConstraints();
+                c.anchor = GridBagConstraints.CENTER;
 
-		labelOverlayTimer = new RichJLabel(getTimeAsString(riTime), 1);
-		labelOverlayTimer.setForeground(server);
-        labelOverlayTimer.setRightShadow(1, 1, Color.BLACK);
-		panelOverlay.add(labelOverlayTimer);
+                labelOverlayIcon = new JLabel(Resources.IMAGE_CAMP_NEUTRAL);
+                changeIcon();
+                c.gridx = 0;
+                c.gridy = 0;
+                panelOverlay.add(labelOverlayIcon, c);
+
+                if (showNames) {
+                    labelOverlayName = new RichJLabel(name, 0);
+                    labelOverlayName.setForeground(server);
+                    labelOverlayName.setRightShadow(1, 1, Color.BLACK);
+                    c.gridy++;
+                    panelOverlay.add(labelOverlayName, c);
+                }
+
+                labelOverlayTimer = new RichJLabel(getTimeAsString(riTime), 0);
+                labelOverlayTimer.setForeground(server);
+                labelOverlayTimer.setRightShadow(1, 1, Color.BLACK);
+                c.gridy++;
+                panelOverlay.add(labelOverlayTimer, c);
+                break;
+
+            case Text:
+                if (showNames) {
+                    labelOverlayName = new RichJLabel(name, 0);
+                    labelOverlayName.setForeground(server);
+                    labelOverlayName.setRightShadow(1, 1, Color.BLACK);
+                    panelOverlay.add(labelOverlayName);
+                }
+
+                labelOverlayTimer = new RichJLabel(getTimeAsString(riTime), 0);
+                labelOverlayTimer.setForeground(server);
+                labelOverlayTimer.setRightShadow(1, 1, Color.BLACK);
+                panelOverlay.add(labelOverlayTimer);
+                break;
+        }
 
 		panelOverlay.setVisible(true);
 	}
@@ -123,6 +246,14 @@ public class Capturepoint {
 	public JPanel getOverlay() {
 		return panelOverlay;
 	}
+
+    public int getTop() {
+        return (int)location.getY();
+    }
+
+    public int getLeft() {
+        return (int)location.getX();
+    }
 
 	private String getTimeAsString(int time) {
 		if (time == 0) {
