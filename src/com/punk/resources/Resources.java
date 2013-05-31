@@ -1,5 +1,6 @@
 package com.punk.resources;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 
@@ -21,6 +22,9 @@ public class Resources {
     public static ImageIcon IMAGE_CASTLE_GREEN = null;
     public static ImageIcon IMAGE_CASTLE_NEUTRAL = null;
 
+    public static Image IMAGE_MAP_EB = null;
+    public static Image IMAGE_MAP_BORDER = null;
+
     public static boolean load() {
         try {
             IMAGE_CAMP_RED = new ImageIcon(Resources.class.getResource("/com/punk/resources/images/camp_red.png"));
@@ -39,6 +43,9 @@ public class Resources {
             IMAGE_CASTLE_BLUE = new ImageIcon(Resources.class.getResource("/com/punk/resources/images/castle_blue.png"));
             IMAGE_CASTLE_GREEN = new ImageIcon(Resources.class.getResource("/com/punk/resources/images/castle_green.png"));
             IMAGE_CASTLE_NEUTRAL = new ImageIcon(Resources.class.getResource("/com/punk/resources/images/castle_neutral.png"));
+
+            IMAGE_MAP_EB = ImageIO.read(Resources.class.getResource("/com/punk/resources/images/map_eb.png"));
+            IMAGE_MAP_BORDER = ImageIO.read(Resources.class.getResource("/com/punk/resources/images/map_borderland.png"));
 
             return true;
         } catch (Exception ignore) {

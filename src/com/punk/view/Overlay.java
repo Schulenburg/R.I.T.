@@ -10,6 +10,7 @@ import javax.swing.*;
 import com.punk.model.Border;
 import com.punk.model.Capturepoint;
 import com.punk.model.CapturepointsUtil;
+import com.punk.resources.Resources;
 
 /**
  * @author Sander Schulenburg aka "Much"(schulenburgsander@gmail.com)
@@ -26,6 +27,7 @@ public class Overlay extends Thread {
 
     private SpringLayout overlayFrameSpringLayout = null;
 	private JFrame overlayFrame = null;
+    private RichJPanel overlayPanel = null;
 
 	private CapturepointsUtil capUtil = null;
 	private Border border = null;
@@ -34,7 +36,9 @@ public class Overlay extends Thread {
 	private boolean showAll = true;
 	private boolean showNames = true;
 
-	Timer timer = null;
+    private boolean requestOnTop = false;
+
+    Timer timer = null;
 
 	public Overlay(CapturepointsUtil capUtil, Border border, Overlay.Type type, Overlay.Size size) {
 		this.capUtil = capUtil;
@@ -45,7 +49,6 @@ public class Overlay extends Thread {
         overlayFrameSpringLayout = new SpringLayout();
 
 		overlayFrame = new JFrame();
-        overlayFrame.setLayout(overlayFrameSpringLayout);
 		overlayFrame.setUndecorated(true);
 		overlayFrame.setSize(0, 0);
 		overlayFrame.setLocationRelativeTo(null);
@@ -53,6 +56,9 @@ public class Overlay extends Thread {
 		overlayFrame.setAlwaysOnTop(true);
 		overlayFrame.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
 		applyPosition();
+        overlayPanel = new RichJPanel(overlayFrameSpringLayout);
+        overlayPanel.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
+        overlayFrame.add(overlayPanel);
 		overlayFrame.setVisible(false);
 
 		updateOverlayFrame();
@@ -64,7 +70,7 @@ public class Overlay extends Thread {
     private void applyPosition() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-        overlayFrame.setLocation((int)screenSize.getWidth() - getWidth(), (int)screenSize.getHeight() - getHeight() - 20);
+        overlayFrame.setLocation((int)screenSize.getWidth() - getWidth(), (int)screenSize.getHeight() - getHeight() - 40);
         overlayFrame.setSize(getWidth(), getHeight());
     }
 
@@ -115,12 +121,22 @@ public class Overlay extends Thread {
     private void clearOverlayFrame() {
         ArrayList<Capturepoint> capturepoints = capUtil.getCapturepoints(this.border);
         for (Capturepoint capturepoint : capturepoints) {
-            overlayFrame.remove(capturepoint.getOverlay());
+            overlayPanel.remove(capturepoint.getOverlay());
         }
     }
 
 	private void updateOverlayFrame() {
         double sizeMultiplier = getSizeMultiplier();
+
+        switch (border) {
+            case EB:
+                overlayPanel.setBackgroundImage(Resources.IMAGE_MAP_EB, sizeMultiplier);
+                break;
+
+            default:
+                overlayPanel.setBackgroundImage(Resources.IMAGE_MAP_BORDER, sizeMultiplier);
+                break;
+        }
 
         ArrayList<Capturepoint> capturepoints = capUtil.getCapturepoints(this.border);
         for (Capturepoint capturepoint : capturepoints) {
@@ -128,12 +144,12 @@ public class Overlay extends Thread {
                 capturepoint.createOverlay(type, showNames);
                 JPanel overlay = capturepoint.getOverlay();
 
-				overlayFrame.add(overlay);
+                overlayPanel.add(overlay);
 
                 switch (type) {
                     case Icons:
-                        overlayFrameSpringLayout.putConstraint(SpringLayout.WEST, overlay, (int) ((double) capturepoint.getTop() * sizeMultiplier), SpringLayout.WEST, overlayFrame);
-                        overlayFrameSpringLayout.putConstraint(SpringLayout.NORTH, overlay, (int) ((double) capturepoint.getLeft() * sizeMultiplier), SpringLayout.NORTH, overlayFrame);
+                        overlayFrameSpringLayout.putConstraint(SpringLayout.WEST, overlay, (int) ((double) capturepoint.getTop() * sizeMultiplier), SpringLayout.WEST, overlayPanel);
+                        overlayFrameSpringLayout.putConstraint(SpringLayout.NORTH, overlay, (int) ((double) capturepoint.getLeft() * sizeMultiplier), SpringLayout.NORTH, overlayPanel);
                         break;
                 }
 			}
@@ -159,11 +175,11 @@ public class Overlay extends Thread {
 
         switch (type) {
             case Icons:
-                overlayFrame.setLayout(overlayFrameSpringLayout);
+                overlayPanel.setLayout(overlayFrameSpringLayout);
                 break;
 
             case Text:
-                overlayFrame.setLayout(new GridLayout(0, 2));
+                overlayPanel.setLayout(new GridLayout(0, 2));
                 break;
         }
 
@@ -191,8 +207,6 @@ public class Overlay extends Thread {
             updateCapturePoints();
 		}
 	}
-
-    private boolean requestOnTop = false;
 
     private void updateCapturePoints() {
         for (Capturepoint cap : capUtil.getCapturepoints(border)) {

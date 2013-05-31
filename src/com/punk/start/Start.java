@@ -23,6 +23,8 @@ import com.punk.view.GUI;
 
 public class Start {
 
+    public static final int API_REFRESH_DELAY =  1000;
+
 	private static final String SERVERNAME = "far shiverpeaks";
 	private static int id = -1;
 	private static String match_id = null;
@@ -44,7 +46,7 @@ public class Start {
 		findmatch(id);
 
 		timer = new Timer();
-		timer.schedule(new updateMatchDetails(), 0, 15000);
+		timer.schedule(new updateMatchDetails(), 0, API_REFRESH_DELAY);
 		new GUI(capUtil);
 	}
 

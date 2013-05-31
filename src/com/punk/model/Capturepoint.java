@@ -1,6 +1,7 @@
 package com.punk.model;
 
 import com.punk.resources.Resources;
+import com.punk.start.Start;
 import com.punk.view.Overlay;
 import com.punk.view.RichJLabel;
 
@@ -29,7 +30,7 @@ public class Capturepoint {
 
 	private Color server;
 	private int riTime;
-	private final int riBufferTime = 8;
+	private final int riBufferTime = (int)((double)Start.API_REFRESH_DELAY / 2000);
 	private boolean initialized = false;
 
 	private JPanel panelOverlay = null;
@@ -83,9 +84,11 @@ public class Capturepoint {
 			riTime = riTime - 1;
 		}
 		labelOverlayTimer.setText(getTimeAsString(riTime));
-		if (labelOverlayName.getForeground() != server) {
+		if (labelOverlayTimer.getForeground() != server) {
 			labelOverlayTimer.setForeground(server);
-			labelOverlayName.setForeground(server);
+			if (labelOverlayName != null) {
+                labelOverlayName.setForeground(server);
+            }
             if (labelOverlayIcon != null) {
                 changeIcon();
             }
