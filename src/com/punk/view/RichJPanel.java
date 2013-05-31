@@ -6,6 +6,7 @@ import java.awt.*;
 public class RichJPanel extends JPanel {
     private Image backgroundImage = null;
     private double sizeMultiplier = 0;
+    private int alpha = 100;
 
     public RichJPanel(LayoutManager layout) {
         super(layout);
@@ -19,7 +20,7 @@ public class RichJPanel extends JPanel {
 
         if (backgroundImage != null) {
             Composite oriAc = g2.getComposite();
-            AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f);
+            AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ((float)alpha / 100));
             g2.setComposite(ac);
             g2.drawImage(backgroundImage, 0, 0, (int)(backgroundImage.getWidth(null) * sizeMultiplier), (int)(backgroundImage.getHeight(null) * sizeMultiplier), null);
             g2.setComposite(oriAc);
@@ -30,8 +31,9 @@ public class RichJPanel extends JPanel {
         return backgroundImage;
     }
 
-    public void setBackgroundImage(Image backgroundImage, double sizeMultiplier) {
+    public void setBackgroundImage(Image backgroundImage, double sizeMultiplier, int alpha) {
         this.backgroundImage = backgroundImage;
         this.sizeMultiplier = sizeMultiplier;
+        this.alpha = alpha;
     }
 }

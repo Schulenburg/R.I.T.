@@ -35,6 +35,8 @@ public class Overlay extends Thread {
     private Overlay.Size size = null;
 	private boolean showAll = true;
 	private boolean showNames = true;
+	private boolean showBackground = true;
+    private int backgroundAlpha = 75;
 
     private boolean requestOnTop = false;
 
@@ -128,14 +130,18 @@ public class Overlay extends Thread {
 	private void updateOverlayFrame() {
         double sizeMultiplier = getSizeMultiplier();
 
-        switch (border) {
-            case EB:
-                overlayPanel.setBackgroundImage(Resources.IMAGE_MAP_EB, sizeMultiplier);
-                break;
+        if (showBackground) {
+            switch (border) {
+                case EB:
+                    overlayPanel.setBackgroundImage(Resources.IMAGE_MAP_EB, sizeMultiplier, backgroundAlpha);
+                    break;
 
-            default:
-                overlayPanel.setBackgroundImage(Resources.IMAGE_MAP_BORDER, sizeMultiplier);
-                break;
+                default:
+                    overlayPanel.setBackgroundImage(Resources.IMAGE_MAP_BORDER, sizeMultiplier, backgroundAlpha);
+                    break;
+            }
+        } else {
+            overlayPanel.setBackgroundImage(null, 0, 0);
         }
 
         ArrayList<Capturepoint> capturepoints = capUtil.getCapturepoints(this.border);
@@ -279,6 +285,22 @@ public class Overlay extends Thread {
         clearOverlayFrame();
 
         showNames = !showNames;
+
+        updateOverlayFrame();
+    }
+
+    public void toggleShowBackground() {
+        clearOverlayFrame();
+
+        showBackground = !showBackground;
+
+        updateOverlayFrame();
+    }
+
+    public void setBackgroundAlpha(int backgroundTransparency) {
+        clearOverlayFrame();
+
+        this.backgroundAlpha = backgroundTransparency;
 
         updateOverlayFrame();
     }

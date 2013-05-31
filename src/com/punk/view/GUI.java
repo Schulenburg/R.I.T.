@@ -4,10 +4,9 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import com.punk.model.Border;
 import com.punk.model.CapturepointsUtil;
@@ -31,11 +30,14 @@ public class GUI {
 	private JCheckBox checkBoxShowAll;
 	private JCheckBox checkBoxAlwaysOnTop;
 	private JCheckBox checkBoxShowNames;
+    private JCheckBox checkBoxShowBackground;
+    private JLabel labelBackgroundAlpha;
+    private JSlider sliderBackgroundAlpha;
 
 	public GUI(CapturepointsUtil capUtil) {
 		frame = new JFrame("R.I.T.");
 		frame.setLayout(new GridLayout(0, 4));
-		frame.setSize(600, 80);
+		frame.setSize(600, 100);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		this.capUtil = capUtil;
@@ -55,6 +57,9 @@ public class GUI {
 		checkBoxShowAll = new JCheckBox("Show all", true);
         checkBoxAlwaysOnTop = new JCheckBox("Always On Top", true);
         checkBoxShowNames = new JCheckBox("Show Names", true);
+        checkBoxShowBackground = new JCheckBox("Show Map", true);
+        labelBackgroundAlpha = new JLabel("Map Alpha:");
+        sliderBackgroundAlpha = new JSlider(0, 100, 75);
 
 		frame.add(btnOverlayWvw);
 		frame.add(comboBoxBorder);
@@ -64,6 +69,10 @@ public class GUI {
 		frame.add(checkBoxShowAll);
 		frame.add(checkBoxAlwaysOnTop);
 		frame.add(checkBoxShowNames);
+		frame.add(checkBoxShowBackground);
+
+		frame.add(labelBackgroundAlpha);
+		frame.add(sliderBackgroundAlpha);
 
 		btnOverlayWvw.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -125,5 +134,22 @@ public class GUI {
 				}
 			}
 		});
+
+        checkBoxShowBackground.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (overlay != null) {
+					overlay.toggleShowBackground();
+				}
+			}
+		});
+
+        sliderBackgroundAlpha.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (overlay != null) {
+                    overlay.setBackgroundAlpha(sliderBackgroundAlpha.getValue());
+                }
+            }
+        });
 	}
 }
