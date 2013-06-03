@@ -1,7 +1,5 @@
 package com.punk.start;
 
-import com.punk.model.Capturepoint;
-import com.punk.resources.Resources;
 import jGW2API.jGW2API;
 
 import java.awt.Color;
@@ -12,18 +10,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.punk.model.Border;
+import com.punk.model.Capturepoint;
 import com.punk.model.CapturepointsUtil;
+import com.punk.resources.Resources;
 import com.punk.view.GUI;
 
-//TODO: Alpha channel 
-//TODO: Alpha channel slider
-//TODO: overlay slider horizontal
-//TODO: overlay slider vertical
 //TODO: retry after API failure
 
 public class Start {
 
-    public static final int API_REFRESH_DELAY =  1000;
+	public static final int API_REFRESH_DELAY = 15000;
 
 	private static final String SERVERNAME = "far shiverpeaks";
 	private static int id = -1;
@@ -38,9 +34,9 @@ public class Start {
 	 * @throws JSONException
 	 */
 	public static void main(String[] args) {
-        Resources.load();
+		Resources.load();
 
-        capUtil = new CapturepointsUtil();
+		capUtil = new CapturepointsUtil();
 
 		findServer(SERVERNAME);
 		findmatch(id);
@@ -152,12 +148,12 @@ public class Start {
 
 	private static Color getColor(String name) {
 		switch (name) {
-            case "Red":
-                return Capturepoint.RED;
-            case "Green":
-                return Capturepoint.GREEN;
-            case "Blue":
-                return Capturepoint.BLUE;
+		case "Red":
+			return Capturepoint.RED;
+		case "Green":
+			return Capturepoint.GREEN;
+		case "Blue":
+			return Capturepoint.BLUE;
 		}
 		return Capturepoint.GRAY;
 	}

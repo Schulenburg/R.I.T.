@@ -1,15 +1,24 @@
 package com.punk.view;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.PointerInfo;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SpringLayout;
 
 import com.punk.model.Border;
 import com.punk.model.Capturepoint;
 import com.punk.model.CapturepointsUtil;
+import com.punk.model.GuiOptions;
 import com.punk.resources.Resources;
 
 /**
@@ -17,38 +26,39 @@ import com.punk.resources.Resources;
  */
 public class Overlay extends Thread {
 
-    public enum Type {
-        Text, Icons
-    }
+	public enum Type {
+		Text, Icons
+	}
 
-    public enum Size {
-        VERY_SMALL, SMALL, MEDIUM, LARGE
-    }
+	public enum Size {
+		VERY_SMALL, SMALL, MEDIUM, LARGE
+	}
 
-    private SpringLayout overlayFrameSpringLayout = null;
+	private SpringLayout overlayFrameSpringLayout = null;
 	private JFrame overlayFrame = null;
-    private RichJPanel overlayPanel = null;
+	private RichJPanel overlayPanel = null;
 
 	private CapturepointsUtil capUtil = null;
 	private Border border = null;
-    private Overlay.Type type = null;
-    private Overlay.Size size = null;
+	private Overlay.Type type = null;
+	private Overlay.Size size = null;
 	private boolean showAll = true;
 	private boolean showNames = true;
 	private boolean showBackground = true;
-    private int backgroundAlpha = 75;
 
-    private boolean requestOnTop = false;
+	private boolean requestOnTop = false;
+	private GuiOptions guiOptions = GuiOptions.getInstance();
 
-    Timer timer = null;
+	Timer timer = null;
 
-	public Overlay(CapturepointsUtil capUtil, Border border, Overlay.Type type, Overlay.Size size) {
+	public Overlay(CapturepointsUtil capUtil, Border border, Overlay.Type type,
+			Overlay.Size size) {
 		this.capUtil = capUtil;
 		this.border = border;
-        this.type = type;
-        this.size = size;
+		this.type = type;
+		this.size = size;
 
-        overlayFrameSpringLayout = new SpringLayout();
+		overlayFrameSpringLayout = new SpringLayout();
 
 		overlayFrame = new JFrame();
 		overlayFrame.setUndecorated(true);
@@ -57,10 +67,17 @@ public class Overlay extends Thread {
 		overlayFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		overlayFrame.setAlwaysOnTop(true);
 		overlayFrame.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
-		applyPosition();
-        overlayPanel = new RichJPanel(overlayFrameSpringLayout);
-        overlayPanel.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
-        overlayFrame.add(overlayPanel);
+
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		overlayFrame.setLocation((int) screenSize.getWidth() - getWidth(),
+				(int) screenSize.getHeight() - getHeight());
+		overlayFrame.setSize(getWidth(), getHeight());
+		guiOptions.setxLocation(overlayFrame.getX());
+		guiOptions.setyLocation(overlayFrame.getY());
+
+		overlayPanel = new RichJPanel(overlayFrameSpringLayout);
+		overlayPanel.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
+		overlayFrame.add(overlayPanel);
 		overlayFrame.setVisible(false);
 
 		updateOverlayFrame();
@@ -69,128 +86,144 @@ public class Overlay extends Thread {
 		timer.schedule(new updateTimers(), 0, 1000);
 	}
 
-    private void applyPosition() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	private void applyPosition() {
 
-        overlayFrame.setLocation((int)screenSize.getWidth() - getWidth(), (int)screenSize.getHeight() - getHeight() - 40);
-        overlayFrame.setSize(getWidth(), getHeight());
-    }
-
-    private int getWidth() {
-        return (int)(550 * getSizeMultiplier());
-    }
-
-    private int getHeight() {
-        switch (border) {
-            case EB:
-                return (int)(500 * getSizeMultiplier());
-
-            default:
-                return (int)(680 * getSizeMultiplier());
-        }
-    }
-
-    private double getSizeMultiplier() {
-        double sizeMultiplier = 1;
-        switch (size) {
-            case VERY_SMALL:
-                sizeMultiplier = 0.33;
-                break;
-
-            case SMALL:
-                sizeMultiplier = 0.5;
-                break;
-
-            case MEDIUM:
-                sizeMultiplier = 0.66;
-                break;
-
-            case LARGE:
-                sizeMultiplier = 1;
-                break;
-        }
-        return sizeMultiplier;
-    }
-
-	public void setBorder(Border border) {
-        clearOverlayFrame();
-
-        this.border = border;
-
-        updateOverlayFrame();
+		overlayFrame.setLocation(guiOptions.getxLocation(),
+				guiOptions.getyLocation());
+		overlayFrame.setSize(getWidth(), getHeight());
 	}
 
-    private void clearOverlayFrame() {
-        ArrayList<Capturepoint> capturepoints = capUtil.getCapturepoints(this.border);
-        for (Capturepoint capturepoint : capturepoints) {
-            overlayPanel.remove(capturepoint.getOverlay());
-        }
-    }
+	public int getWidth() {
+		return (int) (500 * getSizeMultiplier());
+	}
 
-	private void updateOverlayFrame() {
-        double sizeMultiplier = getSizeMultiplier();
+	public int getHeight() {
+		switch (border) {
+		case EB:
+			return (int) (500 * getSizeMultiplier());
 
-        if (showBackground) {
-            switch (border) {
-                case EB:
-                    overlayPanel.setBackgroundImage(Resources.IMAGE_MAP_EB, sizeMultiplier, backgroundAlpha);
-                    break;
+		default:
+			return (int) (680 * getSizeMultiplier());
+		}
+	}
 
-                default:
-                    overlayPanel.setBackgroundImage(Resources.IMAGE_MAP_BORDER, sizeMultiplier, backgroundAlpha);
-                    break;
-            }
-        } else {
-            overlayPanel.setBackgroundImage(null, 0, 0);
-        }
+	private double getSizeMultiplier() {
+		double sizeMultiplier = 1;
+		switch (size) {
+		case VERY_SMALL:
+			sizeMultiplier = 0.33;
+			break;
 
-        ArrayList<Capturepoint> capturepoints = capUtil.getCapturepoints(this.border);
-        for (Capturepoint capturepoint : capturepoints) {
-			if ((capturepoint.getServer() != Color.GRAY && capturepoint.getRiTime() > 0) || showAll) {
-                capturepoint.createOverlay(type, showNames);
-                JPanel overlay = capturepoint.getOverlay();
+		case SMALL:
+			sizeMultiplier = 0.5;
+			break;
 
-                overlayPanel.add(overlay);
+		case MEDIUM:
+			sizeMultiplier = 0.66;
+			break;
 
-                switch (type) {
-                    case Icons:
-                        overlayFrameSpringLayout.putConstraint(SpringLayout.WEST, overlay, (int) ((double) capturepoint.getTop() * sizeMultiplier), SpringLayout.WEST, overlayPanel);
-                        overlayFrameSpringLayout.putConstraint(SpringLayout.NORTH, overlay, (int) ((double) capturepoint.getLeft() * sizeMultiplier), SpringLayout.NORTH, overlayPanel);
-                        break;
-                }
+		case LARGE:
+			sizeMultiplier = 1;
+			break;
+		}
+		return sizeMultiplier;
+	}
+
+	public void setBorder(Border border) {
+		clearOverlayFrame();
+
+		this.border = border;
+
+		updateOverlayFrame();
+	}
+
+	public void clearOverlayFrame() {
+		ArrayList<Capturepoint> capturepoints = capUtil
+				.getCapturepoints(this.border);
+		for (Capturepoint capturepoint : capturepoints) {
+			overlayPanel.remove(capturepoint.getOverlay());
+		}
+	}
+
+	public void updateOverlayFrame() {
+		double sizeMultiplier = getSizeMultiplier();
+
+		if (showBackground) {
+			switch (border) {
+			case EB:
+				overlayPanel.setBackgroundImage(Resources.IMAGE_MAP_EB,
+						sizeMultiplier, guiOptions.getBackgroundAlpha());
+				break;
+			default:
+				overlayPanel.setBackgroundImage(Resources.IMAGE_MAP_BORDER,
+						sizeMultiplier, guiOptions.getBackgroundAlpha());
+				break;
+			}
+		} else {
+			overlayPanel.setBackgroundImage(null, 0, 0);
+		}
+
+		ArrayList<Capturepoint> capturepoints = capUtil
+				.getCapturepoints(this.border);
+		for (Capturepoint capturepoint : capturepoints) {
+			if ((capturepoint.getServer() != Color.GRAY && capturepoint
+					.getRiTime() > 0) || showAll) {
+				capturepoint.createOverlay(type, showNames);
+				JPanel overlay = capturepoint.getOverlay();
+
+				overlayPanel.add(overlay);
+
+				switch (type) {
+				case Icons:
+					overlayFrameSpringLayout
+							.putConstraint(
+									SpringLayout.HORIZONTAL_CENTER,
+									overlay,
+									(int) ((double) capturepoint.getTop() * sizeMultiplier),
+									SpringLayout.WEST, overlayPanel);
+					overlayFrameSpringLayout
+							.putConstraint(
+									SpringLayout.NORTH,
+									overlay,
+									(int) ((double) capturepoint.getLeft() * sizeMultiplier),
+									SpringLayout.NORTH, overlayPanel);
+					break;
+				default:
+					break;
+				}
 			}
 		}
 
-        applyPosition();
+		applyPosition();
 
-        overlayFrame.repaint();
+		overlayFrame.repaint();
 	}
 
-    public void setSize(Size size) {
-        clearOverlayFrame();
+	public void setSize(Size size) {
+		clearOverlayFrame();
 
-        this.size = size;
+		this.size = size;
 
-        updateOverlayFrame();
-    }
+		updateOverlayFrame();
+	}
 
-    public void setType(Type type) {
-        clearOverlayFrame();
+	public void setType(Type type) {
+		clearOverlayFrame();
 
-        this.type = type;
+		this.type = type;
 
-        switch (type) {
-            case Icons:
-                overlayPanel.setLayout(overlayFrameSpringLayout);
-                break;
+		switch (type) {
+		case Icons:
+			overlayPanel.setLayout(overlayFrameSpringLayout);
+			break;
 
-            case Text:
-                overlayPanel.setLayout(new GridLayout(0, 2));
-                break;
-        }
+		case Text:
+			overlayPanel.setLayout(new GridLayout(0, 2));
+			break;
+		}
 
-        updateOverlayFrame();
-    }
+		updateOverlayFrame();
+	}
 
 	private class updateTimers extends TimerTask {
 		public void run() {
@@ -210,35 +243,36 @@ public class Overlay extends Thread {
 				cap.tickRit();
 			}
 
-            updateCapturePoints();
+			updateCapturePoints();
 		}
 	}
 
-    private void updateCapturePoints() {
-        for (Capturepoint cap : capUtil.getCapturepoints(border)) {
-            if (cap.getServer() != Color.GRAY && cap.getRiTime() > 0 || showAll) {
-                cap.getOverlay().setVisible(true);
-            } else {
-                cap.getOverlay().setVisible(false);
-            }
-        }
-        if (!overlayFrame.isVisible()) return;
+	private void updateCapturePoints() {
+		for (Capturepoint cap : capUtil.getCapturepoints(border)) {
+			if (cap.getServer() != Color.GRAY && cap.getRiTime() > 0 || showAll) {
+				cap.getOverlay().setVisible(true);
+			} else {
+				cap.getOverlay().setVisible(false);
+			}
+		}
+		if (!overlayFrame.isVisible())
+			return;
 
-        if (requestOnTop) {
-            overlayFrame.setFocusableWindowState(false);
-            overlayFrame.setVisible(true);
-        } else {
-            overlayFrame.setFocusableWindowState(true);
-        }
-        overlayFrame.repaint();
+		if (requestOnTop) {
+			overlayFrame.setFocusableWindowState(false);
+			overlayFrame.setVisible(true);
+		} else {
+			overlayFrame.setFocusableWindowState(true);
+		}
+		overlayFrame.repaint();
 
-        requestOnTop = !requestOnTop;
-    }
+		requestOnTop = !requestOnTop;
+	}
 
 	public void toggleShowAll() {
 		this.showAll = !showAll;
 
-        updateCapturePoints();
+		updateCapturePoints();
 	}
 
 	public void run() {
@@ -260,48 +294,48 @@ public class Overlay extends Thread {
 					overlayFrame.setSize(getWidth(), getHeight());
 				}
 			} else {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ignore) {
-                    ignore.printStackTrace();
-                }
-            }
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException ignore) {
+					ignore.printStackTrace();
+				}
+			}
 		}
 	}
 
-    public boolean isVisible() {
-        return overlayFrame.isVisible();
-    }
+	public boolean isVisible() {
+		return overlayFrame.isVisible();
+	}
 
 	public void toggleOverlay() {
 		overlayFrame.setVisible(!overlayFrame.isVisible());
 	}
 
-    public void toggleAlwaysOnTop() {
-        overlayFrame.setAlwaysOnTop(!overlayFrame.isAlwaysOnTop());
-    }
+	public void toggleAlwaysOnTop() {
+		overlayFrame.setAlwaysOnTop(!overlayFrame.isAlwaysOnTop());
+	}
 
-    public void toggleShowNames() {
-        clearOverlayFrame();
+	public void toggleShowNames() {
+		clearOverlayFrame();
 
-        showNames = !showNames;
+		showNames = !showNames;
 
-        updateOverlayFrame();
-    }
+		updateOverlayFrame();
+	}
 
-    public void toggleShowBackground() {
-        clearOverlayFrame();
+	public void toggleShowBackground() {
+		clearOverlayFrame();
 
-        showBackground = !showBackground;
+		showBackground = !showBackground;
 
-        updateOverlayFrame();
-    }
+		updateOverlayFrame();
+	}
 
-    public void setBackgroundAlpha(int backgroundTransparency) {
-        clearOverlayFrame();
+	public void setBackgroundAlpha(int backgroundTransparency) {
+		clearOverlayFrame();
 
-        this.backgroundAlpha = backgroundTransparency;
+		guiOptions.setBackgroundAlpha(backgroundTransparency);
 
-        updateOverlayFrame();
-    }
+		updateOverlayFrame();
+	}
 }
