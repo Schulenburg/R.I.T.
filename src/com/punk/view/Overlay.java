@@ -8,6 +8,8 @@ import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
 import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -48,6 +50,7 @@ public class Overlay extends Thread {
 	private boolean showAll = true;
 	private boolean showNames = true;
 	private boolean showBackground = true;
+	private boolean copyToClipboard = false;
 
 	private GuiOptions guiOptions = GuiOptions.getInstance();
 
@@ -257,11 +260,30 @@ public class Overlay extends Thread {
 	}
 
 	private void updateCapturePoints() {
+		String currentTimers = "Timers: ";
 		for (Capturepoint cap : capUtil.getCapturepoints(border)) {
 			if (cap.getServer() != Color.GRAY && cap.getRiTime() > 0 || showAll) {
 				cap.getOverlay().setVisible(true);
+				if (cap.getRiTime() > 0 && copyToClipboard) {
+					currentTimers += cap.getChatcode() + " = " + cap.getTimer()
+							+ " ";
+				}
 			} else {
 				cap.getOverlay().setVisible(false);
+			}
+		}
+		if (copyToClipboard) {
+			if (currentTimers.equals("Timers: ")) {
+				currentTimers += "None";
+			}
+			try {
+				StringSelection stringSelection = new StringSelection(
+						currentTimers);
+				Clipboard clipboard = Toolkit.getDefaultToolkit()
+						.getSystemClipboard();
+				clipboard.setContents(stringSelection, null);
+			} catch (Exception e) {
+
 			}
 		}
 		if (!overlayFrame.isVisible())
@@ -327,6 +349,10 @@ public class Overlay extends Thread {
 		showNames = !showNames;
 
 		updateOverlayFrame();
+	}
+
+	public void toggleCopyToClipboard() {
+		copyToClipboard = !copyToClipboard;
 	}
 
 	public void toggleShowBackground() {

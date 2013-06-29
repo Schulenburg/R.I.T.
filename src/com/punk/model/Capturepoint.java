@@ -31,6 +31,7 @@ public class Capturepoint {
 	private int points;
 	private Type type;
 	private Point location;
+	private String chatcode;
 
 	private Color server;
 	private int riTime;
@@ -43,12 +44,13 @@ public class Capturepoint {
 	private RichJLabel labelOverlayTimer = null;
 
 	public Capturepoint(int id, String name, int points, Type type,
-			Point location) {
+			Point location, String chatcode) {
 		this.id = id;
 		this.name = name;
 		this.points = points;
 		this.type = type;
 		this.location = location;
+		this.chatcode = chatcode;
 
 		server = Color.GRAY;
 		riTime = 0;
@@ -251,6 +253,10 @@ public class Capturepoint {
 		return (int) location.getX();
 	}
 
+	public String getTimer() {
+		return getTimeAsString(getRiTime());
+	}
+
 	private String getTimeAsString(int time) {
 		if (time == 0) {
 			return "";
@@ -261,5 +267,9 @@ public class Capturepoint {
 			return minutes + ":0" + seconds;
 		}
 		return minutes + ":" + seconds;
+	}
+
+	public String getChatcode() {
+		return chatcode;
 	}
 }

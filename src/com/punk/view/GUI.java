@@ -45,7 +45,7 @@ public class GUI {
 	private JComboBox<Overlay.Type> comboBoxOverlayType;
 	private JComboBox<Overlay.Size> comboBoxOverlaySize;
 	private JCheckBox checkBoxShowAll;
-	private JCheckBox checkBoxAlwaysOnTop;
+	private JCheckBox checkBoxCopyToClipboard;
 	private JCheckBox checkBoxShowNames;
 	private JCheckBox checkBoxShowBackground;
 	private JLabel labelBackgroundAlpha;
@@ -84,7 +84,7 @@ public class GUI {
 		comboBoxOverlaySize = new JComboBox<Overlay.Size>(comboOverlaySizeArray);
 		comboBoxOverlayType = new JComboBox<Overlay.Type>(comboOverlayTypeArray);
 		checkBoxShowAll = new JCheckBox("Show all", true);
-		checkBoxAlwaysOnTop = new JCheckBox("Always On Top", true);
+		checkBoxCopyToClipboard = new JCheckBox("Copy to clipboard", false);
 		checkBoxShowNames = new JCheckBox("Show Names", true);
 		checkBoxShowBackground = new JCheckBox("Show Map", true);
 		labelBackgroundAlpha = new JLabel("Map Alpha:");
@@ -107,7 +107,7 @@ public class GUI {
 		components.add(comboBoxOverlaySize);
 
 		components.add(checkBoxShowAll);
-		components.add(checkBoxAlwaysOnTop);
+		components.add(checkBoxCopyToClipboard);
 		components.add(checkBoxShowNames);
 		components.add(checkBoxShowBackground);
 
@@ -186,9 +186,11 @@ public class GUI {
 			}
 		});
 
-		checkBoxAlwaysOnTop.addActionListener(new ActionListener() {
+		checkBoxCopyToClipboard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO copy to clipboard feature
+				if (overlay != null) {
+					overlay.toggleCopyToClipboard();
+				}
 			}
 		});
 
