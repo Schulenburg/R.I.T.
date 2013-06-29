@@ -3,6 +3,8 @@ package com.punk.start;
 import jGW2API.jGW2API;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -31,9 +33,10 @@ public class Start {
 	/**
 	 * @author Sander Schulenburg aka "Much"(schulenburgsander@gmail.com)
 	 * @param args
+	 * @throws IOException
 	 * @throws JSONException
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		Resources.load();
 
 		capUtil = new CapturepointsUtil();
@@ -46,7 +49,7 @@ public class Start {
 		new GUI(capUtil);
 	}
 
-	private static void findServer(String servername) {
+	private static void findServer(String servername) throws IOException {
 		try {
 			JSONArray jsonWorlds = jGW2API.getWorldNames();
 
@@ -63,9 +66,10 @@ public class Start {
 		}
 	}
 
-	private static void findmatch(int serverId) {
+	private static void findmatch(int serverId) throws IOException {
 		try {
-			JSONArray jsonMatches = jGW2API.getWvWMatches();
+			JSONArray jsonMatches = jGW2API.getWvWMatches().getJSONArray(
+					"wvw_matches");
 			for (int i = 0; i < jsonMatches.length(); i++) {
 				if (jsonMatches.getJSONObject(i).get("blue_world_id")
 						.equals(id)
@@ -86,8 +90,10 @@ public class Start {
 	private static class updateMatchDetails extends TimerTask {
 		public void run() {
 			try {
-				JSONArray jsonMatchDetails = jGW2API
-						.getWvWMatchDetails(match_id);
+				System.err.println(jGW2API.getWvWMatchDetails(match_id)
+						.toString());
+				JSONArray jsonMatchDetails = jGW2API.getWvWMatchDetails(
+						match_id).getJSONArray("maps");
 				// System.err.println(jsonMatchDetails.get(0));
 				JSONArray jsonMatchDetailsBorder1 = new JSONArray(
 						jsonMatchDetails.get(0).toString()
@@ -140,6 +146,12 @@ public class Start {
 					capUtil.switchOwner(id, server, Border.EB);
 				}
 			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
