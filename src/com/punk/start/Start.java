@@ -22,6 +22,7 @@ import com.punk.view.GUI;
 public class Start {
 
 	public static final int API_REFRESH_DELAY = 15000;
+	public static int nextAPICall = 15;
 
 	private static final String SERVERNAME = "far shiverpeaks";
 	private static int id = -1;
@@ -89,9 +90,10 @@ public class Start {
 
 	private static class updateMatchDetails extends TimerTask {
 		public void run() {
+			nextAPICall = 15;
 			try {
-				System.err.println(jGW2API.getWvWMatchDetails(match_id)
-						.toString());
+				// System.err.println(jGW2API.getWvWMatchDetails(match_id)
+				// .toString());
 				JSONArray jsonMatchDetails = jGW2API.getWvWMatchDetails(
 						match_id).getJSONArray("maps");
 				// System.err.println(jsonMatchDetails.get(0));

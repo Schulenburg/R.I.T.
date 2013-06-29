@@ -239,19 +239,6 @@ public class Capturepoint {
 		panelOverlay.setVisible(true);
 	}
 
-	@SuppressWarnings("unused")
-	private String getColorName(Color server) {
-		if (server.equals(Capturepoint.RED)) {
-			return "Red";
-		} else if (server.equals(Capturepoint.BLUE)) {
-			return "Blue";
-		} else if (server.equals(Capturepoint.GREEN)) {
-			return "Green";
-		} else {
-			return "Gray";
-		}
-	}
-
 	public JPanel getOverlay() {
 		return panelOverlay;
 	}

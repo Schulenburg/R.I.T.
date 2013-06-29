@@ -57,7 +57,6 @@ public class CapturepointsUtil {
 		if (point.getServer() != server) {
 			if (!point.getInitialized()) {
 				point.setServer(server);
-				point.setRiTime(15);
 				point.setInitialized(true);
 			} else {
 				point.flip(server);
@@ -78,7 +77,7 @@ public class CapturepointsUtil {
 
 	private void createEb() {
 		capturePointsEB.put(9, new Capturepoint(9, "Stonemist Castle", 35,
-				Capturepoint.Type.Castle, new Point(274, 254)));
+				Capturepoint.Type.Castle, new Point(274, 264)));
 
 		capturePointsEB.put(1, new Capturepoint(1, "Overlook", 25,
 				Capturepoint.Type.Keep, new Point(130, 278)));

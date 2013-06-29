@@ -188,9 +188,7 @@ public class GUI {
 
 		checkBoxAlwaysOnTop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (overlay != null) {
-					overlay.toggleAlwaysOnTop();
-				}
+				// TODO copy to clipboard feature
 			}
 		});
 

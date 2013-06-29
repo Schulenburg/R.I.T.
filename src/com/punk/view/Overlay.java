@@ -1,5 +1,6 @@
 package com.punk.view;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -13,6 +14,7 @@ import java.util.TimerTask;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.SpringLayout;
 
 import com.punk.model.Border;
@@ -20,6 +22,7 @@ import com.punk.model.Capturepoint;
 import com.punk.model.CapturepointsUtil;
 import com.punk.model.GuiOptions;
 import com.punk.resources.Resources;
+import com.punk.start.Start;
 
 /**
  * @author Sander Schulenburg aka "Much"(schulenburgsander@gmail.com)
@@ -34,7 +37,7 @@ public class Overlay extends Thread {
 		VERY_SMALL, SMALL, MEDIUM, LARGE
 	}
 
-	private SpringLayout overlayFrameSpringLayout = null;
+	private SpringLayout overlayPanelSpringLayout = null;
 	private JFrame overlayFrame = null;
 	private RichJPanel overlayPanel = null;
 
@@ -46,10 +49,11 @@ public class Overlay extends Thread {
 	private boolean showNames = true;
 	private boolean showBackground = true;
 
-	private boolean requestOnTop = false;
 	private GuiOptions guiOptions = GuiOptions.getInstance();
 
 	Timer timer = null;
+
+	JProgressBar nextUpdateBar = new JProgressBar(0, 100);
 
 	public Overlay(CapturepointsUtil capUtil, Border border, Overlay.Type type,
 			Overlay.Size size) {
@@ -58,8 +62,6 @@ public class Overlay extends Thread {
 		this.type = type;
 		this.size = size;
 
-		overlayFrameSpringLayout = new SpringLayout();
-
 		overlayFrame = new JFrame();
 		overlayFrame.setUndecorated(true);
 		overlayFrame.setSize(0, 0);
@@ -67,6 +69,8 @@ public class Overlay extends Thread {
 		overlayFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		overlayFrame.setAlwaysOnTop(true);
 		overlayFrame.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
+		overlayFrame.setLayout(new BorderLayout());
+		overlayFrame.setVisible(false);
 
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		overlayFrame.setLocation((int) screenSize.getWidth() - getWidth(),
@@ -75,10 +79,15 @@ public class Overlay extends Thread {
 		guiOptions.setxLocation(overlayFrame.getX());
 		guiOptions.setyLocation(overlayFrame.getY());
 
-		overlayPanel = new RichJPanel(overlayFrameSpringLayout);
+		overlayPanelSpringLayout = new SpringLayout();
+		overlayPanel = new RichJPanel(overlayPanelSpringLayout);
 		overlayPanel.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
-		overlayFrame.add(overlayPanel);
-		overlayFrame.setVisible(false);
+		overlayFrame.add(overlayPanel, BorderLayout.CENTER);
+
+		nextUpdateBar.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
+		nextUpdateBar.setForeground(new Color(1.0f, 0.8f, 0.0f, 0.5f));
+		nextUpdateBar.setBorderPainted(false);
+		overlayFrame.add(nextUpdateBar, BorderLayout.SOUTH);
 
 		updateOverlayFrame();
 
@@ -87,7 +96,6 @@ public class Overlay extends Thread {
 	}
 
 	private void applyPosition() {
-
 		overlayFrame.setLocation(guiOptions.getxLocation(),
 				guiOptions.getyLocation());
 		overlayFrame.setSize(getWidth(), getHeight());
@@ -175,13 +183,13 @@ public class Overlay extends Thread {
 
 				switch (type) {
 				case Icons:
-					overlayFrameSpringLayout
+					overlayPanelSpringLayout
 							.putConstraint(
 									SpringLayout.HORIZONTAL_CENTER,
 									overlay,
 									(int) ((double) capturepoint.getTop() * sizeMultiplier),
 									SpringLayout.WEST, overlayPanel);
-					overlayFrameSpringLayout
+					overlayPanelSpringLayout
 							.putConstraint(
 									SpringLayout.NORTH,
 									overlay,
@@ -214,7 +222,7 @@ public class Overlay extends Thread {
 
 		switch (type) {
 		case Icons:
-			overlayPanel.setLayout(overlayFrameSpringLayout);
+			overlayPanel.setLayout(overlayPanelSpringLayout);
 			break;
 
 		case Text:
@@ -244,6 +252,7 @@ public class Overlay extends Thread {
 			}
 
 			updateCapturePoints();
+
 		}
 	}
 
@@ -258,15 +267,16 @@ public class Overlay extends Thread {
 		if (!overlayFrame.isVisible())
 			return;
 
-		if (requestOnTop) {
-			overlayFrame.setFocusableWindowState(false);
-			overlayFrame.setVisible(true);
-		} else {
-			overlayFrame.setFocusableWindowState(true);
-		}
+		overlayFrame.setFocusableWindowState(false);
+		overlayFrame.setVisible(true);
+		updateNextAPICall();
 		overlayFrame.repaint();
+	}
 
-		requestOnTop = !requestOnTop;
+	private void updateNextAPICall() {
+		Start.nextAPICall--;
+		int size = 100 / 15 * Start.nextAPICall;
+		nextUpdateBar.setValue(size);
 	}
 
 	public void toggleShowAll() {
@@ -309,10 +319,6 @@ public class Overlay extends Thread {
 
 	public void toggleOverlay() {
 		overlayFrame.setVisible(!overlayFrame.isVisible());
-	}
-
-	public void toggleAlwaysOnTop() {
-		overlayFrame.setAlwaysOnTop(!overlayFrame.isAlwaysOnTop());
 	}
 
 	public void toggleShowNames() {
