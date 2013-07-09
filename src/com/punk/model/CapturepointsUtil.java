@@ -84,13 +84,13 @@ public class CapturepointsUtil {
 		capturePointsEB.put(17, new Capturepoint(17, "Mendon's Gap", 10,
 				Capturepoint.Type.Tower, new Point(96, 200), "[&BO8DAAA=]"));
 		capturePointsEB.put(6, new Capturepoint(6, "Speldan Clearcut", 5,
-				Capturepoint.Type.Camp, new Point(128, 108), "[&BO0DAAA=]"));
+				Capturepoint.Type.Camp, new Point(128, 128), "[&BO0DAAA=]"));
 		capturePointsEB.put(18, new Capturepoint(18, "Anzalias Pass", 10,
 				Capturepoint.Type.Tower, new Point(190, 192), "[&BOwDAAA=]"));
 		capturePointsEB.put(20, new Capturepoint(20, "Veloka Slope", 10,
 				Capturepoint.Type.Tower, new Point(92, 328), "[&BO4DAAA=]"));
 		capturePointsEB.put(5, new Capturepoint(5, "Pangloss Rise", 5,
-				Capturepoint.Type.Camp, new Point(146, 368), "[&BPADAAA=]"));
+				Capturepoint.Type.Camp, new Point(146, 373), "[&BPADAAA=]"));
 		capturePointsEB.put(19, new Capturepoint(19, "Ogrewatch Cut", 10,
 				Capturepoint.Type.Tower, new Point(166, 316), "[&BPEDAAA=]"));
 
@@ -99,13 +99,13 @@ public class CapturepointsUtil {
 		capturePointsEB.put(22, new Capturepoint(22, "Bravost Escarpment", 10,
 				Capturepoint.Type.Tower, new Point(310, 446), "[&BOYDAAA=]"));
 		capturePointsEB.put(8, new Capturepoint(8, "Umberglade Woods", 5,
-				Capturepoint.Type.Camp, new Point(250, 412), "[&BOQDAAA=]"));
+				Capturepoint.Type.Camp, new Point(250, 417), "[&BOQDAAA=]"));
 		capturePointsEB.put(21, new Capturepoint(21, "Durios Gulch", 10,
 				Capturepoint.Type.Tower, new Point(262, 350), "[&BOMDAAA=]"));
 		capturePointsEB.put(15, new Capturepoint(15, "Langor Gulch", 10,
-				Capturepoint.Type.Tower, new Point(424, 394), "[&BOUDAAA=]"));
+				Capturepoint.Type.Tower, new Point(424, 404), "[&BOUDAAA=]"));
 		capturePointsEB.put(7, new Capturepoint(7, "Danelon Passage", 5,
-				Capturepoint.Type.Camp, new Point(438, 320), "[&BOcDAAA=]"));
+				Capturepoint.Type.Camp, new Point(423, 330), "[&BOcDAAA=]"));
 		capturePointsEB.put(16, new Capturepoint(16, "Quentin Lake", 10,
 				Capturepoint.Type.Tower, new Point(380, 286), "[&BOgDAAA=]"));
 
@@ -114,7 +114,7 @@ public class CapturepointsUtil {
 		capturePointsEB.put(13, new Capturepoint(13, "Jerrifer's Slough", 10,
 				Capturepoint.Type.Tower, new Point(410, 128), "[&BPYDAAA=]"));
 		capturePointsEB.put(4, new Capturepoint(4, "Golanta Clearing", 5,
-				Capturepoint.Type.Camp, new Point(416, 186), "[&BPUDAAA=]"));
+				Capturepoint.Type.Camp, new Point(396, 206), "[&BPUDAAA=]"));
 		capturePointsEB.put(14, new Capturepoint(14, "Klovan Gully", 10,
 				Capturepoint.Type.Tower, new Point(354, 188), "[&BPQDAAA=]"));
 		capturePointsEB.put(11, new Capturepoint(11, "Aldon's Ledge", 10,
