@@ -157,14 +157,6 @@ public class GUI {
 				if (overlay != null) {
 					overlay.setSize((Overlay.Size) comboBoxOverlaySize
 							.getSelectedItem());
-					sliderOverlayX.setMaximum((int) screenSize.getWidth()
-							- overlay.getWidth());
-					sliderOverlayX.setValue((int) screenSize.getWidth()
-							- overlay.getWidth());
-					sliderOverlayY.setMaximum((int) screenSize.getHeight()
-							- overlay.getHeight());
-					sliderOverlayY.setValue((int) screenSize.getHeight()
-							- overlay.getHeight());
 				}
 			}
 		});

@@ -179,7 +179,8 @@ public class Overlay extends Thread {
 		for (Capturepoint capturepoint : capturepoints) {
 			if ((capturepoint.getServer() != Color.GRAY && capturepoint
 					.getRiTime() > 0) || showAll) {
-				capturepoint.createOverlay(type, showNames);
+				capturepoint
+						.createOverlay(type, showNames, getSizeMultiplier());
 				JPanel overlay = capturepoint.getOverlay();
 
 				overlayPanel.add(overlay);
@@ -239,19 +240,19 @@ public class Overlay extends Thread {
 	private class updateTimers extends TimerTask {
 		public void run() {
 			for (Capturepoint cap : capUtil.getCapturepoints(Border.RED)) {
-				cap.tickRit();
+				cap.tickRit(getSizeMultiplier());
 			}
 
 			for (Capturepoint cap : capUtil.getCapturepoints(Border.GREEN)) {
-				cap.tickRit();
+				cap.tickRit(getSizeMultiplier());
 			}
 
 			for (Capturepoint cap : capUtil.getCapturepoints(Border.BLUE)) {
-				cap.tickRit();
+				cap.tickRit(getSizeMultiplier());
 			}
 
 			for (Capturepoint cap : capUtil.getCapturepoints(Border.EB)) {
-				cap.tickRit();
+				cap.tickRit(getSizeMultiplier());
 			}
 
 			updateCapturePoints();

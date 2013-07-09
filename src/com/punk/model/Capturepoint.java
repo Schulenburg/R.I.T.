@@ -3,8 +3,10 @@ package com.punk.model;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Point;
 
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -84,99 +86,108 @@ public class Capturepoint {
 		this.riTime = riTime;
 	}
 
-	public void tickRit() {
+	public void tickRit(double scale) {
 		if (panelOverlay == null)
 			return;
 
 		if (riTime > 0) {
 			riTime = riTime - 1;
 		}
+
 		labelOverlayTimer.setText(getTimeAsString(riTime));
+
 		if (labelOverlayTimer.getForeground() != server) {
 			labelOverlayTimer.setForeground(server);
 			if (labelOverlayName != null) {
 				labelOverlayName.setForeground(server);
 			}
 			if (labelOverlayIcon != null) {
-				changeIcon();
+				labelOverlayIcon.setIcon(getImageIcon(scale));
 			}
 		}
 	}
 
-	private void changeIcon() {
+	private ImageIcon getImageIcon(double scale) {
+		if (scale < 1) {
+			scale = scale + (scale / 2);
+		}
+		int widht = (int) (Resources.IMAGE_CASTLE_RED.getIconWidth() * scale);
+		int height = (int) (Resources.IMAGE_CASTLE_RED.getIconHeight() * scale);
+
 		if (server.equals(Capturepoint.RED)) {
 			switch (type) {
 			case Castle:
-				labelOverlayIcon.setIcon(Resources.IMAGE_CASTLE_RED);
-				break;
+				return new ImageIcon(Resources.IMAGE_CASTLE_RED.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 
 			case Keep:
-				labelOverlayIcon.setIcon(Resources.IMAGE_KEEP_RED);
-				break;
+				return new ImageIcon(Resources.IMAGE_KEEP_RED.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 
 			case Tower:
-				labelOverlayIcon.setIcon(Resources.IMAGE_TOWER_RED);
-				break;
+				return new ImageIcon(Resources.IMAGE_TOWER_RED.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 
 			case Camp:
-				labelOverlayIcon.setIcon(Resources.IMAGE_CAMP_RED);
-				break;
+				return new ImageIcon(Resources.IMAGE_CAMP_RED.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 			}
 		} else if (server.equals(Capturepoint.BLUE)) {
 			switch (type) {
 			case Castle:
-				labelOverlayIcon.setIcon(Resources.IMAGE_CASTLE_BLUE);
-				break;
+				return new ImageIcon(Resources.IMAGE_CASTLE_BLUE.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 
 			case Keep:
-				labelOverlayIcon.setIcon(Resources.IMAGE_KEEP_BLUE);
-				break;
+				return new ImageIcon(Resources.IMAGE_KEEP_BLUE.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 
 			case Tower:
-				labelOverlayIcon.setIcon(Resources.IMAGE_TOWER_BLUE);
-				break;
+				return new ImageIcon(Resources.IMAGE_TOWER_BLUE.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 
 			case Camp:
-				labelOverlayIcon.setIcon(Resources.IMAGE_CAMP_BLUE);
-				break;
+				return new ImageIcon(Resources.IMAGE_CAMP_BLUE.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 			}
 		} else if (server.equals(Capturepoint.GREEN)) {
 			switch (type) {
 			case Castle:
-				labelOverlayIcon.setIcon(Resources.IMAGE_CASTLE_GREEN);
-				break;
+				return new ImageIcon(Resources.IMAGE_CASTLE_GREEN.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 
 			case Keep:
-				labelOverlayIcon.setIcon(Resources.IMAGE_KEEP_GREEN);
-				break;
+				return new ImageIcon(Resources.IMAGE_KEEP_GREEN.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 
 			case Tower:
-				labelOverlayIcon.setIcon(Resources.IMAGE_TOWER_GREEN);
-				break;
+				return new ImageIcon(Resources.IMAGE_TOWER_GREEN.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 
 			case Camp:
-				labelOverlayIcon.setIcon(Resources.IMAGE_CAMP_GREEN);
-				break;
+				return new ImageIcon(Resources.IMAGE_CAMP_GREEN.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 			}
 		} else {
 			switch (type) {
 			case Castle:
-				labelOverlayIcon.setIcon(Resources.IMAGE_CASTLE_NEUTRAL);
-				break;
+				return new ImageIcon(Resources.IMAGE_CASTLE_NEUTRAL.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 
 			case Keep:
-				labelOverlayIcon.setIcon(Resources.IMAGE_KEEP_NEUTRAL);
-				break;
+				return new ImageIcon(Resources.IMAGE_KEEP_NEUTRAL.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 
 			case Tower:
-				labelOverlayIcon.setIcon(Resources.IMAGE_TOWER_NEUTRAL);
-				break;
+				return new ImageIcon(Resources.IMAGE_TOWER_NEUTRAL.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 
 			case Camp:
-				labelOverlayIcon.setIcon(Resources.IMAGE_CAMP_NEUTRAL);
-				break;
+				return new ImageIcon(Resources.IMAGE_CAMP_NEUTRAL.getImage()
+						.getScaledInstance(widht, height, Image.SCALE_SMOOTH));
 			}
 		}
+		return null;
 	}
 
 	public boolean getInitialized() {
@@ -192,7 +203,7 @@ public class Capturepoint {
 		riTime = 300 - riBufferTime;
 	}
 
-	public void createOverlay(Overlay.Type type, boolean showNames) {
+	public void createOverlay(Overlay.Type type, boolean showNames, double scale) {
 		panelOverlay = new JPanel();
 		panelOverlay.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
 
@@ -203,7 +214,7 @@ public class Capturepoint {
 			c.anchor = GridBagConstraints.CENTER;
 
 			labelOverlayIcon = new JLabel(Resources.IMAGE_CAMP_NEUTRAL);
-			changeIcon();
+			labelOverlayIcon.setIcon(getImageIcon(scale));
 			c.gridx = 0;
 			c.gridy = 0;
 			panelOverlay.add(labelOverlayIcon, c);
