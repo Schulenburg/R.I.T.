@@ -1,6 +1,7 @@
 package com.punk.model;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -23,6 +24,8 @@ public class Capturepoint {
 	public static final Color BLUE = new Color(0, 174, 239);
 	public static final Color GREEN = new Color(141, 198, 63);
 	public static final Color GRAY = new Color(149, 149, 149);
+
+	private final double FONTMULTIPLIER = 1.3;
 
 	public enum Type {
 		Castle, Keep, Tower, Camp
@@ -98,19 +101,20 @@ public class Capturepoint {
 
 		if (labelOverlayTimer.getForeground() != server) {
 			labelOverlayTimer.setForeground(server);
-			if (labelOverlayName != null) {
-				labelOverlayName.setForeground(server);
-			}
 			if (labelOverlayIcon != null) {
 				labelOverlayIcon.setIcon(getImageIcon(scale));
+			}
+			if (labelOverlayName != null) {
+				labelOverlayName.setForeground(server);
+				Font font = labelOverlayName.getFont();
+				double fontScale = scale * FONTMULTIPLIER;
+				labelOverlayName.setFont(new Font(font.getName(), font
+						.getStyle(), (int) (font.getSize() * fontScale)));
 			}
 		}
 	}
 
 	private ImageIcon getImageIcon(double scale) {
-		if (scale < 1) {
-			scale = scale + (scale / 2);
-		}
 		int widht = (int) (Resources.IMAGE_CASTLE_RED.getIconWidth() * scale);
 		int height = (int) (Resources.IMAGE_CASTLE_RED.getIconHeight() * scale);
 
@@ -212,25 +216,32 @@ public class Capturepoint {
 			panelOverlay.setLayout(new GridBagLayout());
 			GridBagConstraints c = new GridBagConstraints();
 			c.anchor = GridBagConstraints.CENTER;
-
-			labelOverlayIcon = new JLabel(Resources.IMAGE_CAMP_NEUTRAL);
-			labelOverlayIcon.setIcon(getImageIcon(scale));
 			c.gridx = 0;
 			c.gridy = 0;
-			panelOverlay.add(labelOverlayIcon, c);
+			double fontScale = scale * FONTMULTIPLIER;
 
 			if (showNames) {
 				labelOverlayName = new RichJLabel(name, 0);
 				labelOverlayName.setForeground(server);
 				labelOverlayName.setRightShadow(1, 1, Color.BLACK);
+				Font font = labelOverlayName.getFont();
+				labelOverlayName.setFont(new Font(font.getName(), font
+						.getStyle(), (int) (font.getSize() * fontScale)));
 				c.gridy++;
 				panelOverlay.add(labelOverlayName, c);
 			}
 
+			labelOverlayIcon = new JLabel(Resources.IMAGE_CAMP_NEUTRAL);
+			labelOverlayIcon.setIcon(getImageIcon(scale));
+			panelOverlay.add(labelOverlayIcon, c);
+			c.gridy++;
+
 			labelOverlayTimer = new RichJLabel(getTimeAsString(riTime), 0);
 			labelOverlayTimer.setForeground(server);
 			labelOverlayTimer.setRightShadow(1, 1, Color.BLACK);
-			c.gridy++;
+			Font font = labelOverlayTimer.getFont();
+			labelOverlayTimer.setFont(new Font(font.getName(), font.getStyle(),
+					(int) (font.getSize() * fontScale)));
 			panelOverlay.add(labelOverlayTimer, c);
 			break;
 

@@ -36,7 +36,7 @@ public class GUI {
 	private Border[] comboBorderArray = { Border.EB, Border.RED, Border.GREEN,
 			Border.BLUE };
 	private Overlay.Size[] comboOverlaySizeArray = { Overlay.Size.LARGE,
-			Overlay.Size.MEDIUM, Overlay.Size.SMALL, Overlay.Size.VERY_SMALL };
+			Overlay.Size.MEDIUM, Overlay.Size.SMALL };
 	private Overlay.Type[] comboOverlayTypeArray = { Overlay.Type.Icons,
 			Overlay.Type.Text };
 
@@ -90,7 +90,9 @@ public class GUI {
 		labelBackgroundAlpha = new JLabel("Map Alpha:");
 		sliderBackgroundAlpha = new JSlider(0, 100, 75);
 		btnDashboard = new JButton("Dashboard");
+		btnDashboard.setVisible(false);
 		btnSaveSettings = new JButton("Save settings");
+		btnSaveSettings.setVisible(false);
 
 		labelOverlayX = new JLabel("Map horizontal location:");
 		sliderOverlayX = new JSlider(0, (int) screenSize.getWidth()
@@ -157,6 +159,10 @@ public class GUI {
 				if (overlay != null) {
 					overlay.setSize((Overlay.Size) comboBoxOverlaySize
 							.getSelectedItem());
+					sliderOverlayX.setMaximum((int) screenSize.getWidth()
+							- overlay.getWidth());
+					sliderOverlayY.setMaximum((int) screenSize.getHeight()
+							- overlay.getHeight());
 				}
 			}
 		});

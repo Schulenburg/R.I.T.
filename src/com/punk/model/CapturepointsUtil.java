@@ -34,11 +34,17 @@ public class CapturepointsUtil {
 	}
 
 	public ArrayList<Capturepoint> getCapturepoints(Border border) {
-		ArrayList<Capturepoint> points = new ArrayList<Capturepoint>();
-		for (Capturepoint c : capturePoints.get(border).values()) {
-			points.add(c);
+		switch (border) {
+		case EB:
+			return new ArrayList<Capturepoint>(capturePointsEB.values());
+		case RED:
+			return new ArrayList<Capturepoint>(capturePointsRed.values());
+		case BLUE:
+			return new ArrayList<Capturepoint>(capturePointsBlue.values());
+		case GREEN:
+			return new ArrayList<Capturepoint>(capturePointsGreen.values());
 		}
-		return points;
+		return new ArrayList<Capturepoint>();
 	}
 
 	public Capturepoint getCapturepoint(Border border, int id) {
@@ -103,9 +109,9 @@ public class CapturepointsUtil {
 		capturePointsEB.put(21, new Capturepoint(21, "Durios Gulch", 10,
 				Capturepoint.Type.Tower, new Point(262, 350), "[&BOMDAAA=]"));
 		capturePointsEB.put(15, new Capturepoint(15, "Langor Gulch", 10,
-				Capturepoint.Type.Tower, new Point(424, 404), "[&BOUDAAA=]"));
+				Capturepoint.Type.Tower, new Point(419, 404), "[&BOUDAAA=]"));
 		capturePointsEB.put(7, new Capturepoint(7, "Danelon Passage", 5,
-				Capturepoint.Type.Camp, new Point(423, 330), "[&BOcDAAA=]"));
+				Capturepoint.Type.Camp, new Point(428, 330), "[&BOcDAAA=]"));
 		capturePointsEB.put(16, new Capturepoint(16, "Quentin Lake", 10,
 				Capturepoint.Type.Tower, new Point(380, 286), "[&BOgDAAA=]"));
 

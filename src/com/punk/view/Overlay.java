@@ -36,7 +36,7 @@ public class Overlay extends Thread {
 	}
 
 	public enum Size {
-		VERY_SMALL, SMALL, MEDIUM, LARGE
+		SMALL, MEDIUM, LARGE
 	}
 
 	private SpringLayout overlayPanelSpringLayout = null;
@@ -121,16 +121,12 @@ public class Overlay extends Thread {
 	private double getSizeMultiplier() {
 		double sizeMultiplier = 1;
 		switch (size) {
-		case VERY_SMALL:
-			sizeMultiplier = 0.33;
-			break;
-
 		case SMALL:
-			sizeMultiplier = 0.5;
+			sizeMultiplier = 0.60;
 			break;
 
 		case MEDIUM:
-			sizeMultiplier = 0.66;
+			sizeMultiplier = 0.80;
 			break;
 
 		case LARGE:
