@@ -126,7 +126,7 @@ public class Overlay extends Thread {
 			break;
 
 		case MEDIUM:
-			sizeMultiplier = 0.80;
+			sizeMultiplier = 0.75;
 			break;
 
 		case LARGE:

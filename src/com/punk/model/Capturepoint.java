@@ -115,8 +115,8 @@ public class Capturepoint {
 	}
 
 	private ImageIcon getImageIcon(double scale) {
-		int widht = (int) (Resources.IMAGE_CASTLE_RED.getIconWidth() * scale);
-		int height = (int) (Resources.IMAGE_CASTLE_RED.getIconHeight() * scale);
+		int widht = (int) (Resources.IMAGE_CASTLE_RED.getIconWidth() * (scale * 1.2));
+		int height = (int) (Resources.IMAGE_CASTLE_RED.getIconHeight() * (scale * 1.2));
 
 		if (server.equals(Capturepoint.RED)) {
 			switch (type) {
