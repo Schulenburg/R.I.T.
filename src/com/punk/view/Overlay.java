@@ -10,19 +10,24 @@ import java.awt.PointerInfo;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SpringLayout;
 
+import com.melloware.jintellitype.HotkeyListener;
+import com.melloware.jintellitype.JIntellitype;
 import com.punk.model.Border;
 import com.punk.model.Capturepoint;
 import com.punk.model.CapturepointsUtil;
 import com.punk.model.GuiOptions;
+import com.punk.mumblelink.MumbleLink;
 import com.punk.resources.Resources;
 import com.punk.start.Start;
 
@@ -52,6 +57,9 @@ public class Overlay extends Thread {
 	private boolean showBackground = true;
 	private boolean copyToClipboard = false;
 
+	private MumbleLink mumbleLink;
+	private JLabel labelPlayer = new JLabel(Resources.IMAGE_CLASS_ELEMENTALIST);
+
 	private GuiOptions guiOptions = GuiOptions.getInstance();
 
 	Timer timer = null;
@@ -64,6 +72,48 @@ public class Overlay extends Thread {
 		this.border = border;
 		this.type = type;
 		this.size = size;
+
+		mumbleLink = new MumbleLink();
+
+		JIntellitype jintel = JIntellitype.getInstance();
+		jintel.registerHotKey(1, JIntellitype.MOD_ALT, (int) 'M');
+		jintel.registerHotKey(2, JIntellitype.MOD_ALT, (int) 'N');
+		jintel.registerHotKey(3, JIntellitype.MOD_ALT, (int) 'B');
+
+		jintel.registerHotKey(4, JIntellitype.MOD_ALT, (int) KeyEvent.VK_LEFT);
+		jintel.registerHotKey(5, JIntellitype.MOD_ALT, (int) KeyEvent.VK_RIGHT);
+		jintel.registerHotKey(6, JIntellitype.MOD_ALT, (int) KeyEvent.VK_UP);
+		jintel.registerHotKey(7, JIntellitype.MOD_ALT, (int) KeyEvent.VK_DOWN);
+		jintel.addHotKeyListener(new HotkeyListener() {
+
+			@Override
+			public void onHotKey(int arg0) {
+				switch (arg0) {
+				case 1:
+					nextBorder();
+					break;
+				case 2:
+					nextScale();
+					break;
+				case 3:
+					toggleOverlay();
+					break;
+				case 4:
+					moveFrameLeft();
+					break;
+				case 5:
+					moveFrameRight();
+					break;
+				case 6:
+					moveFrameUp();
+					break;
+				case 7:
+					moveFrameDown();
+					break;
+				}
+
+			}
+		});
 
 		overlayFrame = new JFrame();
 		overlayFrame.setUndecorated(true);
@@ -141,6 +191,82 @@ public class Overlay extends Thread {
 
 		this.border = border;
 
+		updateOverlayFrame();
+	}
+
+	public Border getBorder() {
+		return border;
+	}
+
+	private void nextBorder() {
+		if (getBorder() == Border.EB) {
+			setBorder(Border.RED);
+		} else if (getBorder() == Border.RED) {
+			setBorder(Border.GREEN);
+		} else if (getBorder() == Border.GREEN) {
+			setBorder(Border.BLUE);
+		} else if (getBorder() == Border.BLUE) {
+			setBorder(Border.EB);
+		}
+	}
+
+	private void prevBorder() {
+		if (getBorder() == Border.EB) {
+			setBorder(Border.BLUE);
+		} else if (getBorder() == Border.RED) {
+			setBorder(Border.EB);
+		} else if (getBorder() == Border.GREEN) {
+			setBorder(Border.RED);
+		} else if (getBorder() == Border.BLUE) {
+			setBorder(Border.GREEN);
+		}
+	}
+
+	public Size getSize() {
+		return size;
+	}
+
+	private void nextScale() {
+		if (getSize() == Size.LARGE) {
+			setSize(Size.SMALL);
+		} else if (getSize() == Size.MEDIUM) {
+			setSize(Size.LARGE);
+		} else if (getSize() == Size.SMALL) {
+			setSize(Size.MEDIUM);
+		}
+	}
+
+	private void prevScale() {
+		if (getSize() == Size.LARGE) {
+			setSize(Size.MEDIUM);
+		} else if (getSize() == Size.MEDIUM) {
+			setSize(Size.SMALL);
+		} else if (getSize() == Size.SMALL) {
+			setSize(Size.LARGE);
+		}
+	}
+
+	private void moveFrameLeft() {
+		clearOverlayFrame();
+		guiOptions.setxLocation(guiOptions.getxLocation() - 10);
+		updateOverlayFrame();
+	}
+
+	private void moveFrameRight() {
+		clearOverlayFrame();
+		guiOptions.setxLocation(guiOptions.getxLocation() + 10);
+		updateOverlayFrame();
+	}
+
+	private void moveFrameUp() {
+		clearOverlayFrame();
+		guiOptions.setyLocation(guiOptions.getyLocation() - 10);
+		updateOverlayFrame();
+	}
+
+	private void moveFrameDown() {
+		clearOverlayFrame();
+		guiOptions.setyLocation(guiOptions.getyLocation() + 10);
 		updateOverlayFrame();
 	}
 
@@ -252,8 +378,41 @@ public class Overlay extends Thread {
 			}
 
 			updateCapturePoints();
+			updatePlayerLocation();
 
 		}
+	}
+
+	private double getMapWidth() {
+		if (border == Border.EB) {
+			return 73728.0;
+		}
+		return 61440.0;
+	}
+
+	private double getMapHeight() {
+		if (border == Border.EB) {
+			return 73728.0;
+		}
+		return 86016.0;
+	}
+
+	private void updatePlayerLocation() {
+		double playerX = (mumbleLink.getfAvatarPosition()[0] * 39.3700787);
+		int locationX = (int) (((getWidth()) / getMapWidth()) * playerX)
+				+ (getWidth() / 2);
+
+		double playerZ = (mumbleLink.getfAvatarPosition()[2] * 39.3700787);
+		int locationZ = (int) (((getHeight()) / getMapHeight()) * (playerZ * -1))
+				+ (getHeight() / 2);
+
+		overlayPanel.remove(labelPlayer);
+		overlayPanel.add(labelPlayer);
+		overlayPanelSpringLayout.putConstraint(SpringLayout.HORIZONTAL_CENTER,
+				labelPlayer, locationX, SpringLayout.WEST, overlayPanel);
+		overlayPanelSpringLayout.putConstraint(SpringLayout.NORTH, labelPlayer,
+				locationZ, SpringLayout.NORTH, overlayPanel);
+		overlayPanel.repaint();
 	}
 
 	private void updateCapturePoints() {
@@ -302,11 +461,13 @@ public class Overlay extends Thread {
 		this.showAll = !showAll;
 
 		updateCapturePoints();
+		updatePlayerLocation();
 	}
 
 	public void run() {
 		while (overlayFrame != null) {
 			if (overlayFrame.isVisible()) {
+
 				PointerInfo a = MouseInfo.getPointerInfo();
 				Point b = a.getLocation();
 				int x = (int) b.getX();

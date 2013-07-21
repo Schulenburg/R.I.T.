@@ -25,6 +25,8 @@ public class Capturepoint {
 	public static final Color GREEN = new Color(141, 198, 63);
 	public static final Color GRAY = new Color(149, 149, 149);
 
+	private final int FONTSIZE = 12;
+
 	private final double FONTMULTIPLIER = 1.3;
 
 	public enum Type {
@@ -109,7 +111,7 @@ public class Capturepoint {
 				Font font = labelOverlayName.getFont();
 				double fontScale = scale * FONTMULTIPLIER;
 				labelOverlayName.setFont(new Font(font.getName(), font
-						.getStyle(), (int) (font.getSize() * fontScale)));
+						.getStyle(), (int) (FONTSIZE * fontScale)));
 			}
 		}
 	}
@@ -226,7 +228,7 @@ public class Capturepoint {
 				labelOverlayName.setRightShadow(1, 1, Color.BLACK);
 				Font font = labelOverlayName.getFont();
 				labelOverlayName.setFont(new Font(font.getName(), font
-						.getStyle(), (int) (font.getSize() * fontScale)));
+						.getStyle(), (int) (FONTSIZE * fontScale)));
 				c.gridy++;
 				panelOverlay.add(labelOverlayName, c);
 			}
@@ -241,7 +243,7 @@ public class Capturepoint {
 			labelOverlayTimer.setRightShadow(1, 1, Color.BLACK);
 			Font font = labelOverlayTimer.getFont();
 			labelOverlayTimer.setFont(new Font(font.getName(), font.getStyle(),
-					(int) (font.getSize() * fontScale)));
+					(int) (FONTSIZE * fontScale)));
 			panelOverlay.add(labelOverlayTimer, c);
 			break;
 
