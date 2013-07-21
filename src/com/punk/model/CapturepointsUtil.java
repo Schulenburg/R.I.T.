@@ -134,9 +134,9 @@ public class CapturepointsUtil {
 	private void createBorderRed() {
 		capturePointsRed.put(37, new Capturepoint(37, "Garrison", 25,
 				Capturepoint.Type.Keep, new Point(282, 238), "[&BBYFAAA=]"));
-		capturePointsRed.put(33, new Capturepoint(33, "Dreaming Bay", 25,
+		capturePointsRed.put(33, new Capturepoint(33, "Bay", 25,
 				Capturepoint.Type.Keep, new Point(384, 40), "[&BBMFAAA=]"));
-		capturePointsRed.put(32, new Capturepoint(32, "Etheron Hills", 25,
+		capturePointsRed.put(32, new Capturepoint(32, "Hills", 25,
 				Capturepoint.Type.Keep, new Point(372, 468), "[&BA8FAAA=]"));
 
 		capturePointsRed.put(38, new Capturepoint(38, "Longview", 10,
@@ -165,9 +165,9 @@ public class CapturepointsUtil {
 	private void createBorderGreen() {
 		capturePointsGreen.put(46, new Capturepoint(46, "Garrison", 25,
 				Capturepoint.Type.Keep, new Point(282, 238), "[&BDIFAAA=]"));
-		capturePointsGreen.put(44, new Capturepoint(44, "Dreadfall Bay", 25,
+		capturePointsGreen.put(44, new Capturepoint(44, "Bay", 25,
 				Capturepoint.Type.Keep, new Point(384, 40), "[&BC8FAAA=]"));
-		capturePointsGreen.put(41, new Capturepoint(41, "Shadaran Hills", 25,
+		capturePointsGreen.put(41, new Capturepoint(41, "Hills", 25,
 				Capturepoint.Type.Keep, new Point(372, 468), "[&BDAFAAA=]"));
 
 		capturePointsGreen.put(47, new Capturepoint(47, "Sunnyhill", 10,
@@ -196,9 +196,9 @@ public class CapturepointsUtil {
 	private void createBorderBlue() {
 		capturePointsBlue.put(23, new Capturepoint(23, "Garrison", 25,
 				Capturepoint.Type.Keep, new Point(282, 238), "[&BCQFAAA=]"));
-		capturePointsBlue.put(27, new Capturepoint(27, "Ascension Bay", 25,
+		capturePointsBlue.put(27, new Capturepoint(27, "Bay", 25,
 				Capturepoint.Type.Keep, new Point(384, 40), "[&BCgFAAA=]"));
-		capturePointsBlue.put(31, new Capturepoint(31, "Askalion Hills", 25,
+		capturePointsBlue.put(31, new Capturepoint(31, "Hills", 25,
 				Capturepoint.Type.Keep, new Point(372, 468), "[&BCAFAAA=]"));
 
 		capturePointsBlue.put(30, new Capturepoint(30, "Woodhaven", 10,
