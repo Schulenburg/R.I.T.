@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -17,9 +18,12 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import com.melloware.jintellitype.HotkeyListener;
+import com.melloware.jintellitype.JIntellitype;
 import com.punk.model.Border;
 import com.punk.model.CapturepointsUtil;
 import com.punk.model.GuiOptions;
+import com.punk.view.Overlay.Size;
 
 /**
  * @author Sander Schulenburg aka "Much"(schulenburgsander@gmail.com)
@@ -82,6 +86,60 @@ public class GUI {
 		frame.add(new JLabel(credits), BorderLayout.SOUTH);
 
 		frame.setVisible(true);
+
+		JIntellitype jintel = JIntellitype.getInstance();
+		jintel.registerHotKey(1, JIntellitype.MOD_ALT, (int) 'M');
+		jintel.registerHotKey(2, JIntellitype.MOD_ALT, (int) 'N');
+		jintel.registerHotKey(3, JIntellitype.MOD_ALT, (int) 'B');
+
+		jintel.registerHotKey(4, JIntellitype.MOD_ALT, (int) KeyEvent.VK_LEFT);
+		jintel.registerHotKey(5, JIntellitype.MOD_ALT, (int) KeyEvent.VK_RIGHT);
+		jintel.registerHotKey(6, JIntellitype.MOD_ALT, (int) KeyEvent.VK_UP);
+		jintel.registerHotKey(7, JIntellitype.MOD_ALT, (int) KeyEvent.VK_DOWN);
+		jintel.addHotKeyListener(new HotkeyListener() {
+
+			@Override
+			public void onHotKey(int arg0) {
+				switch (arg0) {
+				case 1:
+					if (overlay.getBorder() == Border.EB) {
+						comboBoxBorder.setSelectedItem(Border.RED);
+					} else if (overlay.getBorder() == Border.RED) {
+						comboBoxBorder.setSelectedItem(Border.GREEN);
+					} else if (overlay.getBorder() == Border.GREEN) {
+						comboBoxBorder.setSelectedItem(Border.BLUE);
+					} else if (overlay.getBorder() == Border.BLUE) {
+						comboBoxBorder.setSelectedItem(Border.EB);
+					}
+					break;
+				case 2:
+					if (overlay.getSize() == Size.LARGE) {
+						comboBoxOverlaySize.setSelectedItem(Size.SMALL);
+					} else if (overlay.getSize() == Size.MEDIUM) {
+						comboBoxOverlaySize.setSelectedItem(Size.LARGE);
+					} else if (overlay.getSize() == Size.SMALL) {
+						comboBoxOverlaySize.setSelectedItem(Size.MEDIUM);
+					}
+					break;
+				case 3:
+					btnOverlayWvw.doClick();
+					break;
+				case 4:
+					sliderOverlayX.setValue(sliderOverlayX.getValue() - 10);
+					break;
+				case 5:
+					sliderOverlayX.setValue(sliderOverlayX.getValue() + 10);
+					break;
+				case 6:
+					sliderOverlayY.setValue(sliderOverlayY.getValue() - 10);
+					break;
+				case 7:
+					sliderOverlayY.setValue(sliderOverlayY.getValue() + 10);
+					break;
+				}
+
+			}
+		});
 	}
 
 	private void addMenu(JPanel components) {
