@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -62,13 +61,12 @@ public class Overlay extends Thread {
 	private SpringLayout overlayPanelSpringLayout = null;
 	private JFrame overlayFrame = null;
 	private RichJPanel overlayPanel = null;
+	private boolean isMouseOnOverlay = false;
 
 	private CapturepointsUtil capUtil = null;
 	private Border border = null;
-	private Overlay.Type type = null;
-	private Overlay.Size size = null;
-	private Overlay.Class prof = Class.elementalist;
-	private boolean showAll = true;
+	private Size size = null;
+	private Class prof = Class.elementalist;
 	private boolean showNames = true;
 	private boolean showBackground = true;
 	private boolean copyToClipboard = false;
@@ -88,7 +86,6 @@ public class Overlay extends Thread {
 			Overlay.Size size) {
 		this.capUtil = capUtil;
 		this.border = border;
-		this.type = type;
 		this.size = size;
 
 		mumbleLink = new MumbleLink();
@@ -151,21 +148,15 @@ public class Overlay extends Thread {
 	}
 
 	private double getSizeMultiplier() {
-		double sizeMultiplier = 1;
 		switch (size) {
 		case SMALL:
-			sizeMultiplier = 0.60;
-			break;
-
+			return 0.60;
 		case MEDIUM:
-			sizeMultiplier = 0.75;
-			break;
-
-		case LARGE:
-			sizeMultiplier = 1;
-			break;
+			return 0.75;
+		default:
+			return 1;
 		}
-		return sizeMultiplier;
+
 	}
 
 	public void setBorder(Border border) {
@@ -239,39 +230,23 @@ public class Overlay extends Thread {
 		}
 
 		ArrayList<Capturepoint> capturepoints = capUtil
-				.getCapturepoints(this.border);
+				.getCapturepoints(border);
+
 		for (Capturepoint capturepoint : capturepoints) {
-			if ((capturepoint.getServer() != Color.GRAY && capturepoint
-					.getRiTime() > 0) || showAll) {
-				capturepoint
-						.createOverlay(type, showNames, getSizeMultiplier());
-				JPanel overlay = capturepoint.getOverlay();
+			capturepoint.createOverlay(showNames, getSizeMultiplier());
+			JPanel overlay = capturepoint.getOverlay();
+			overlayPanel.add(overlay);
 
-				overlayPanel.add(overlay);
-
-				switch (type) {
-				case Icons:
-					overlayPanelSpringLayout
-							.putConstraint(
-									SpringLayout.HORIZONTAL_CENTER,
-									overlay,
-									(int) ((double) capturepoint.getTop() * sizeMultiplier),
-									SpringLayout.WEST, overlayPanel);
-					overlayPanelSpringLayout
-							.putConstraint(
-									SpringLayout.NORTH,
-									overlay,
-									(int) ((double) capturepoint.getLeft() * sizeMultiplier),
-									SpringLayout.NORTH, overlayPanel);
-					break;
-				default:
-					break;
-				}
-			}
+			overlayPanelSpringLayout.putConstraint(
+					SpringLayout.HORIZONTAL_CENTER, overlay,
+					(int) ((double) capturepoint.getTop() * sizeMultiplier),
+					SpringLayout.WEST, overlayPanel);
+			overlayPanelSpringLayout.putConstraint(SpringLayout.NORTH, overlay,
+					(int) ((double) capturepoint.getLeft() * sizeMultiplier),
+					SpringLayout.NORTH, overlayPanel);
 		}
 
 		applyPosition();
-
 		overlayFrame.repaint();
 	}
 
@@ -315,47 +290,20 @@ public class Overlay extends Thread {
 			return Resources.IMAGE_CLASS_ELEMENTALIST;
 		case engineer:
 			return Resources.IMAGE_CLASS_ENGINEER;
-
 		case guardian:
 			return Resources.IMAGE_CLASS_GUARDIAN;
-
 		case mesmer:
 			return Resources.IMAGE_CLASS_MESMER;
-
 		case necromancer:
 			return Resources.IMAGE_CLASS_NECROMANCER;
-
 		case ranger:
 			return Resources.IMAGE_CLASS_RANGER;
-
 		case thief:
 			return Resources.IMAGE_CLASS_THIEF;
-
 		case warrior:
 			return Resources.IMAGE_CLASS_WARRIOR;
-
 		}
-
 		return null;
-
-	}
-
-	public void setType(Type type) {
-		clearOverlayFrame();
-
-		this.type = type;
-
-		switch (type) {
-		case Icons:
-			overlayPanel.setLayout(overlayPanelSpringLayout);
-			break;
-
-		case Text:
-			overlayPanel.setLayout(new GridLayout(0, 2));
-			break;
-		}
-
-		updateOverlayFrame();
 	}
 
 	private class updateTimers extends TimerTask {
@@ -407,108 +355,115 @@ public class Overlay extends Thread {
 		}
 		playername = playername.trim();
 		String data = playername + "," + playerX + "," + playerZ + ","
-				+ mumbleLink.getMapId() + "," + prof.toString();
-		Socket s = null;
+				+ mumbleLink.getMapId() + "," + prof.toString() + ","
+				+ guiOptions.getNickname() + "," + guiOptions.getChannel();
+		Socket socket = null;
 
-		// Create the socket connection to the MultiThreadedSocketServer port
-		// 11111
-		try {
-			s = new Socket(ip, 11111);
-		} catch (UnknownHostException uhe) {
-			// Server Host unreachable
-			s = null;
-		} catch (IOException ioe) {
-			// Cannot connect to port on given server host
-			s = null;
+		if (guiOptions.isTrack()) {
+			try {
+				socket = new Socket(ip, 11111);
+			} catch (UnknownHostException uhe) {
+				// Server Host unreachable
+				socket = null;
+			} catch (IOException ioe) {
+				// Cannot connect to port on given server host
+				socket = null;
+			}
 		}
 
-		if (s == null) {
-			int locationX = (int) (((getWidth()) / getMapWidth()) * playerX)
-					+ (getWidth() / 2);
-			int locationZ = (int) (((getHeight()) / getMapHeight()) * (playerZ * -1))
-					+ (getHeight() / 2);
-
-			ImageIcon icon = new ImageIcon(
-					getProfIcon(prof).getImage().getScaledInstance(
-							(int) (Resources.IMAGE_CLASS_ELEMENTALIST
-									.getIconWidth() * getSizeMultiplier()),
-							(int) (Resources.IMAGE_CLASS_ELEMENTALIST
-									.getIconHeight() * getSizeMultiplier()),
-							Image.SCALE_SMOOTH));
-
-			labelPlayer.setIcon(icon);
-
-			for (String key : players.keySet()) {
-				overlayPanel.remove(players.get(key));
-			}
-			overlayPanel.remove(labelPlayer);
-			if (mumbleLink.getMapId() == getBorderId()) {
-				overlayPanel.add(labelPlayer);
-				overlayPanel.setComponentZOrder(labelPlayer, 0);
-				overlayPanelSpringLayout.putConstraint(
-						SpringLayout.HORIZONTAL_CENTER, labelPlayer, locationX,
-						SpringLayout.WEST, overlayPanel);
-				overlayPanelSpringLayout.putConstraint(SpringLayout.NORTH,
-						labelPlayer, locationZ, SpringLayout.NORTH,
-						overlayPanel);
-			}
-			overlayPanel.repaint();
+		if (socket == null) {
+			handleLocalLocation(playerX, playerZ);
 		} else {
+			handleNetworkLocation(socket, data);
+		}
+	}
 
-			ObjectInputStream in = null;
-			PrintWriter out = null;
+	private void handleLocalLocation(double playerX, double playerZ) {
+		int locationX = (int) (((getWidth()) / getMapWidth()) * playerX)
+				+ (getWidth() / 2);
+		int locationZ = (int) (((getHeight()) / getMapHeight()) * (playerZ * -1))
+				+ (getHeight() / 2);
+
+		ImageIcon icon = new ImageIcon(
+				getProfIcon(prof).getImage().getScaledInstance(
+						(int) (Resources.IMAGE_CLASS_ELEMENTALIST
+								.getIconWidth() * getSizeMultiplier()),
+						(int) (Resources.IMAGE_CLASS_ELEMENTALIST
+								.getIconHeight() * getSizeMultiplier()),
+						Image.SCALE_SMOOTH));
+
+		labelPlayer.setIcon(icon);
+
+		for (String key : players.keySet()) {
+			overlayPanel.remove(players.get(key));
+		}
+		overlayPanel.remove(labelPlayer);
+		if (mumbleLink.getMapId() == getBorderId()) {
+			overlayPanel.add(labelPlayer);
+			overlayPanel.setComponentZOrder(labelPlayer, 0);
+			overlayPanelSpringLayout.putConstraint(
+					SpringLayout.HORIZONTAL_CENTER, labelPlayer, locationX,
+					SpringLayout.WEST, overlayPanel);
+			overlayPanelSpringLayout.putConstraint(SpringLayout.NORTH,
+					labelPlayer, locationZ, SpringLayout.NORTH, overlayPanel);
+		}
+		overlayPanel.repaint();
+	}
+
+	private void handleNetworkLocation(Socket socket, String data) {
+		ObjectInputStream in = null;
+		PrintWriter out = null;
+
+		try {
+			// Create the streams to send and receive information
+			in = new ObjectInputStream(socket.getInputStream());
+			out = new PrintWriter(new OutputStreamWriter(
+					socket.getOutputStream()));
+
+			// Since this is the client, we will initiate the talking.
+			// Send a string data and flush
+			out.println(data);
+			out.flush();
+			// Receive the reply.
 
 			try {
-				// Create the streams to send and receive information
-				in = new ObjectInputStream(s.getInputStream());
-				out = new PrintWriter(new OutputStreamWriter(
-						s.getOutputStream()));
-
-				// Since this is the client, we will initiate the talking.
-				// Send a string data and flush
-				out.println(data);
-				out.flush();
-				// Receive the reply.
-
-				try {
-					HashMap<String, JLabel> playersServer = (HashMap<String, JLabel>) in
-							.readObject();
-					for (String key : playersServer.keySet()) {
-						if (!players.containsKey(key)) {
-							players.put(key, playersServer.get(key));
-						} else {
-							players.get(key).setToolTipText(
-									playersServer.get(key).getToolTipText());
-						}
+				HashMap<String, JLabel> playersServer = (HashMap<String, JLabel>) in
+						.readObject();
+				for (String key : playersServer.keySet()) {
+					if (!players.containsKey(key)) {
+						players.put(key, playersServer.get(key));
+					} else {
+						players.get(key).setToolTipText(
+								playersServer.get(key).getToolTipText());
 					}
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
 				}
-
-				// Send the special string to tell server to quit.
-				out.println("Quit");
-				out.flush();
-			} catch (IOException ioe) {
-				System.out
-						.println("Exception during communication. Server probably closed connection.");
-			} finally {
-				try {
-					// Close the input and output streams
-					out.close();
-					in.close();
-					// Close the socket before quitting
-					s.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
 			}
 
-			overlayPanel.remove(labelPlayer);
-			for (String key : players.keySet()) {
-				overlayPanel.remove(players.get(key));
+			// Send the special string to tell server to quit.
+			out.println("Quit");
+			out.flush();
+		} catch (IOException ioe) {
+			System.out
+					.println("Exception during communication. Server probably closed connection.");
+		} finally {
+			try {
+				out.close();
+				in.close();
+				socket.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
-				if (Integer.parseInt(players.get(key).getToolTipText()
-						.split(",")[2]) == getBorderId()) {
+		overlayPanel.remove(labelPlayer);
+		for (String key : players.keySet()) {
+			overlayPanel.remove(players.get(key));
+			if (Integer
+					.parseInt(players.get(key).getToolTipText().split(",")[2]) == getBorderId()) {
+				if (players.get(key).getToolTipText().split(",")[5]
+						.equals(guiOptions.getChannel())) {
 
 					double pX = Double.parseDouble(players.get(key)
 							.getToolTipText().split(",")[0]);
@@ -519,12 +474,16 @@ public class Overlay extends Thread {
 							+ (getWidth() / 2);
 					int z = (int) (((getHeight()) / getMapHeight()) * pZ * -1)
 							+ (getHeight() / 2);
+
+					players.get(key).setText(
+							players.get(key).getToolTipText().split(",")[4]);
+
 					players.get(key).setFont(
 							new Font(players.get(key).getFont().getName(),
 									players.get(key).getFont().getStyle(), 10));
+
 					ImageIcon icon = getProfIcon(players.get(key)
 							.getToolTipText().split(",")[3]);
-
 					players.get(key).setIcon(
 							new ImageIcon(icon.getImage().getScaledInstance(
 									(int) (16 * getSizeMultiplier()),
@@ -541,22 +500,17 @@ public class Overlay extends Thread {
 							overlayPanel);
 				}
 			}
-
-			overlayPanel.repaint();
 		}
+
+		overlayPanel.repaint();
 	}
 
 	private void updateCapturePoints() {
 		String currentTimers = "Timers: ";
 		for (Capturepoint cap : capUtil.getCapturepoints(border)) {
-			if (cap.getServer() != Color.GRAY && cap.getRiTime() > 0 || showAll) {
-				cap.getOverlay().setVisible(true);
-				if (cap.getRiTime() > 0 && copyToClipboard) {
-					currentTimers += cap.getChatcode() + " = " + cap.getTimer()
-							+ " ";
-				}
-			} else {
-				cap.getOverlay().setVisible(false);
+			if (cap.getRiTime() > 0 && copyToClipboard) {
+				currentTimers += cap.getChatcode() + " = " + cap.getTimer()
+						+ " ";
 			}
 		}
 		if (copyToClipboard) {
@@ -570,13 +524,16 @@ public class Overlay extends Thread {
 						.getSystemClipboard();
 				clipboard.setContents(stringSelection, null);
 			} catch (Exception e) {
-
+				e.printStackTrace();
 			}
 		}
 		if (!overlayFrame.isVisible())
 			return;
 
 		updateNextAPICall();
+
+		overlayFrame.setFocusableWindowState(false);
+		overlayFrame.setVisible(true);
 		overlayFrame.repaint();
 	}
 
@@ -584,42 +541,6 @@ public class Overlay extends Thread {
 		Start.nextAPICall--;
 		int size = 100 / 15 * Start.nextAPICall;
 		nextUpdateBar.setValue(size);
-	}
-
-	public void toggleShowAll() {
-		this.showAll = !showAll;
-
-		updateCapturePoints();
-		updatePlayerLocation();
-	}
-
-	public void run() {
-		while (overlayFrame != null) {
-			if (overlayFrame.isVisible()) {
-
-				PointerInfo a = MouseInfo.getPointerInfo();
-				Point b = a.getLocation();
-				int x = (int) b.getX();
-				int y = (int) b.getY();
-
-				boolean isMouseOnOverlay = x > overlayFrame.getLocation().x
-						&& x < overlayFrame.getLocation().x + getWidth()
-						&& y > overlayFrame.getLocation().y
-						&& y < overlayFrame.getLocation().y + getHeight();
-
-				if (isMouseOnOverlay) {
-					// overlayFrame.setSize(0, 0);
-				} else {
-					// overlayFrame.setSize(getWidth(), getHeight());
-				}
-			} else {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException ignore) {
-					ignore.printStackTrace();
-				}
-			}
-		}
 	}
 
 	public boolean isVisible() {
@@ -632,9 +553,7 @@ public class Overlay extends Thread {
 
 	public void toggleShowNames() {
 		clearOverlayFrame();
-
 		showNames = !showNames;
-
 		updateOverlayFrame();
 	}
 
@@ -644,17 +563,43 @@ public class Overlay extends Thread {
 
 	public void toggleShowBackground() {
 		clearOverlayFrame();
-
 		showBackground = !showBackground;
-
 		updateOverlayFrame();
 	}
 
 	public void setBackgroundAlpha(int backgroundTransparency) {
 		clearOverlayFrame();
-
 		guiOptions.setBackgroundAlpha(backgroundTransparency);
-
 		updateOverlayFrame();
 	}
+
+	public void run() {
+		while (overlayFrame != null) {
+			if (overlayFrame.isVisible()) {
+
+				PointerInfo a = MouseInfo.getPointerInfo();
+				Point b = a.getLocation();
+				int x = (int) b.getX();
+				int y = (int) b.getY();
+
+				isMouseOnOverlay = x > overlayFrame.getLocation().x
+						&& x < overlayFrame.getLocation().x + getWidth()
+						&& y > overlayFrame.getLocation().y
+						&& y < overlayFrame.getLocation().y + getHeight();
+
+				if (isMouseOnOverlay) {
+					overlayFrame.setSize(0, 0);
+				} else {
+					overlayFrame.setSize(getWidth(), getHeight());
+				}
+			} else {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException ignore) {
+					ignore.printStackTrace();
+				}
+			}
+		}
+	}
+
 }

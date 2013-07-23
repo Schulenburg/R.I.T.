@@ -7,6 +7,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -15,6 +16,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -36,13 +38,10 @@ public class GUI {
 
 	private GuiOptions guiOptions = GuiOptions.getInstance();
 	private Overlay overlay = null;
-	private JFrame frame = null;
 	private Border[] comboBorderArray = { Border.EB, Border.RED, Border.GREEN,
 			Border.BLUE };
 	private Overlay.Size[] comboOverlaySizeArray = { Overlay.Size.LARGE,
 			Overlay.Size.MEDIUM, Overlay.Size.SMALL };
-	private Overlay.Type[] comboOverlayTypeArray = { Overlay.Type.Icons,
-			Overlay.Type.Text };
 	private Overlay.Class[] comboOverlayClassArray = {
 			Overlay.Class.elementalist, Overlay.Class.engineer,
 			Overlay.Class.guardian, Overlay.Class.mesmer,
@@ -51,42 +50,266 @@ public class GUI {
 
 	private JButton btnOverlayWvw;
 	private JComboBox<Border> comboBoxBorder;
-	private JComboBox<Overlay.Type> comboBoxOverlayType;
 	private JComboBox<Overlay.Size> comboBoxOverlaySize;
 	private JComboBox<Overlay.Class> comboBoxOverlayClass;
-	private JCheckBox checkBoxShowAll;
-	private JCheckBox checkBoxCopyToClipboard;
-	private JCheckBox checkBoxShowNames;
+
 	private JCheckBox checkBoxShowBackground;
+	private JCheckBox checkBoxShowNames;
+	private JCheckBox checkBoxCopyToClipboard;
+
 	private JLabel labelBackgroundAlpha;
 	private JSlider sliderBackgroundAlpha;
+	private JLabel labelBackgroundAlphaCurrent;
+
 	private JLabel labelOverlayX;
 	private JSlider sliderOverlayX;
+	private JLabel labelOverlayXCurrent;
+
 	private JLabel labelOverlayY;
 	private JSlider sliderOverlayY;
-	private JButton btnDashboard;
-	private JButton btnSaveSettings;
+	private JLabel labelOverlayYCurrent;
+
+	private JLabel labelChannel;
+	private JTextField txtChannel;
+
+	private JLabel labelNickname;
+	private JTextField txtNickname;
+	private JLabel labelNicknameLimit;
+
+	private JCheckBox checkboxTrack;
+	private JButton btnUpdateTrackSettings;
 
 	public GUI(CapturepointsUtil capUtil) {
-		frame = new JFrame("R.I.T.");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLayout(new BorderLayout());
-		frame.setSize(600, 200);
-		JPanel components = new JPanel();
-		components.setLayout(new GridLayout(0, 4));
-
 		overlay = new Overlay(capUtil, Border.EB, Overlay.Type.Icons,
 				Overlay.Size.LARGE);
 		overlay.start();
 
+		JPanel components = new JPanel();
+		components.setLayout(new GridLayout(0, 4));
 		addMenu(components);
 		components.setVisible(true);
+
+		JFrame frame = new JFrame("R.I.T.");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setLayout(new BorderLayout());
+		frame.setSize(650, 200);
 		frame.add(components, BorderLayout.CENTER);
-
 		frame.add(new JLabel(credits), BorderLayout.SOUTH);
-
 		frame.setVisible(true);
 
+		setHotkeys();
+	}
+
+	private void addMenu(JPanel components) {
+		btnOverlayWvw = new JButton("Show overlay");
+		comboBoxBorder = new JComboBox<Border>(comboBorderArray);
+		comboBoxOverlaySize = new JComboBox<Overlay.Size>(comboOverlaySizeArray);
+		comboBoxOverlayClass = new JComboBox<Overlay.Class>(
+				comboOverlayClassArray);
+
+		checkBoxCopyToClipboard = new JCheckBox("Copy to clipboard", false);
+		checkBoxShowNames = new JCheckBox("Show Names", true);
+		checkBoxShowBackground = new JCheckBox("Show Map", true);
+
+		labelBackgroundAlpha = new JLabel("Map Alpha:");
+		sliderBackgroundAlpha = new JSlider(0, 100, 75);
+		labelBackgroundAlphaCurrent = new JLabel("75");
+
+		labelOverlayX = new JLabel("Map horizontal location:");
+		sliderOverlayX = new JSlider(0, (int) screenSize.getWidth()
+				- overlay.getWidth(), (int) screenSize.getWidth()
+				- overlay.getWidth());
+		labelOverlayXCurrent = new JLabel(sliderOverlayX.getMaximum() + "");
+
+		labelOverlayY = new JLabel("Map vertical location:");
+		sliderOverlayY = new JSlider(0, (int) screenSize.getHeight()
+				- overlay.getHeight(), (int) screenSize.getHeight()
+				- overlay.getHeight());
+		labelOverlayYCurrent = new JLabel(sliderOverlayY.getMaximum() + "");
+
+		labelChannel = new JLabel("Channel");
+		txtChannel = new JTextField("Public");
+
+		labelNickname = new JLabel("Nickname");
+		txtNickname = new JTextField("Guest", 5);
+		labelNicknameLimit = new JLabel("(5 char max)");
+
+		checkboxTrack = new JCheckBox("Send location online", false);
+		btnUpdateTrackSettings = new JButton("Update track settings");
+
+		components.add(btnOverlayWvw);
+		components.add(comboBoxBorder);
+		components.add(comboBoxOverlaySize);
+		components.add(comboBoxOverlayClass);
+
+		components.add(checkBoxShowNames);
+		components.add(checkBoxShowBackground);
+		components.add(checkBoxCopyToClipboard);
+		components.add(new JLabel());
+
+		components.add(labelBackgroundAlpha);
+		components.add(new JLabel("0 - 100"));
+		components.add(sliderBackgroundAlpha);
+		components.add(labelBackgroundAlphaCurrent);
+
+		components.add(labelOverlayX);
+		components.add(new JLabel("0 - " + (int) screenSize.getWidth()));
+		components.add(sliderOverlayX);
+		components.add(labelOverlayXCurrent);
+
+		components.add(labelOverlayY);
+		components.add(new JLabel("0 - " + (int) screenSize.getHeight()));
+		components.add(sliderOverlayY);
+		components.add(labelOverlayYCurrent);
+
+		components.add(labelChannel);
+		components.add(txtChannel);
+		components.add(new JLabel());
+		components.add(new JLabel());
+
+		components.add(labelNickname);
+		components.add(txtNickname);
+		components.add(labelNicknameLimit);
+		components.add(new JLabel());
+
+		components.add(checkboxTrack);
+		components.add(btnUpdateTrackSettings);
+		components.add(new JLabel());
+		components.add(new JLabel());
+
+		btnOverlayWvw.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (overlay != null) {
+					overlay.toggleOverlay();
+					if (overlay.isVisible()) {
+						btnOverlayWvw.setText("Hide overlay");
+					} else {
+						btnOverlayWvw.setText("Show overlay");
+					}
+				}
+			}
+		});
+
+		comboBoxBorder.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (overlay != null) {
+					overlay.setBorder((Border) comboBoxBorder.getSelectedItem());
+				}
+			}
+		});
+
+		comboBoxOverlaySize.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (overlay != null) {
+					overlay.setSize((Overlay.Size) comboBoxOverlaySize
+							.getSelectedItem());
+					sliderOverlayX.setMaximum((int) screenSize.getWidth()
+							- overlay.getWidth());
+					sliderOverlayY.setMaximum((int) screenSize.getHeight()
+							- overlay.getHeight());
+				}
+			}
+		});
+
+		comboBoxOverlayClass.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (overlay != null) {
+					overlay.setProf((Overlay.Class) comboBoxOverlayClass
+							.getSelectedItem());
+				}
+			}
+		});
+
+		checkBoxCopyToClipboard.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (overlay != null) {
+					overlay.toggleCopyToClipboard();
+				}
+			}
+		});
+
+		checkBoxShowNames.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (overlay != null) {
+					overlay.toggleShowNames();
+				}
+			}
+		});
+
+		checkBoxShowBackground.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (overlay != null) {
+					overlay.toggleShowBackground();
+				}
+			}
+		});
+
+		sliderBackgroundAlpha.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (overlay != null) {
+					overlay.setBackgroundAlpha(sliderBackgroundAlpha.getValue());
+					labelBackgroundAlphaCurrent.setText(sliderBackgroundAlpha
+							.getValue() + "");
+				}
+			}
+		});
+
+		sliderOverlayX.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (overlay != null) {
+					overlay.clearOverlayFrame();
+					guiOptions.setxLocation(sliderOverlayX.getValue());
+					labelOverlayXCurrent.setText(sliderOverlayX.getValue() + "");
+					overlay.updateOverlayFrame();
+				}
+			}
+		});
+
+		sliderOverlayY.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (overlay != null) {
+					overlay.clearOverlayFrame();
+					guiOptions.setyLocation(sliderOverlayY.getValue());
+					labelOverlayYCurrent.setText(sliderOverlayY.getValue() + "");
+					overlay.updateOverlayFrame();
+				}
+			}
+		});
+
+		txtNickname.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent arg0) {
+			}
+
+			@Override
+			public void keyReleased(KeyEvent arg0) {
+				if (txtNickname.getText().length() > 5) {
+					txtNickname.setText(txtNickname.getText().substring(0, 5));
+				}
+
+			}
+
+			@Override
+			public void keyPressed(KeyEvent arg0) {
+			}
+		});
+
+		btnUpdateTrackSettings.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				guiOptions.setNickname(txtNickname.getText());
+				guiOptions.setChannel(txtChannel.getText());
+				guiOptions.setTrack(checkboxTrack.isSelected());
+			}
+		});
+	}
+
+	private void setHotkeys() {
 		JIntellitype jintel = JIntellitype.getInstance();
 		jintel.registerHotKey(1, JIntellitype.MOD_ALT, (int) 'M');
 		jintel.registerHotKey(2, JIntellitype.MOD_ALT, (int) 'N');
@@ -138,181 +361,6 @@ public class GUI {
 					break;
 				}
 
-			}
-		});
-	}
-
-	private void addMenu(JPanel components) {
-		btnOverlayWvw = new JButton("Show overlay");
-		comboBoxBorder = new JComboBox<Border>(comboBorderArray);
-		comboBoxOverlaySize = new JComboBox<Overlay.Size>(comboOverlaySizeArray);
-		comboBoxOverlayType = new JComboBox<Overlay.Type>(comboOverlayTypeArray);
-		comboBoxOverlayClass = new JComboBox<Overlay.Class>(
-				comboOverlayClassArray);
-		checkBoxShowAll = new JCheckBox("Show all", true);
-		checkBoxCopyToClipboard = new JCheckBox("Copy to clipboard", false);
-		checkBoxShowNames = new JCheckBox("Show Names", true);
-		checkBoxShowBackground = new JCheckBox("Show Map", true);
-		labelBackgroundAlpha = new JLabel("Map Alpha:");
-		sliderBackgroundAlpha = new JSlider(0, 100, 75);
-		btnDashboard = new JButton("Dashboard");
-		btnDashboard.setVisible(false);
-		btnSaveSettings = new JButton("Save settings");
-		btnSaveSettings.setVisible(false);
-
-		labelOverlayX = new JLabel("Map horizontal location:");
-		sliderOverlayX = new JSlider(0, (int) screenSize.getWidth()
-				- overlay.getWidth(), (int) screenSize.getWidth()
-				- overlay.getWidth());
-		labelOverlayY = new JLabel("Map vertical location:");
-		sliderOverlayY = new JSlider(0, (int) screenSize.getHeight()
-				- overlay.getHeight(), (int) screenSize.getHeight()
-				- overlay.getHeight());
-
-		components.add(btnOverlayWvw);
-		components.add(comboBoxBorder);
-		components.add(comboBoxOverlayType);
-		components.add(comboBoxOverlaySize);
-
-		components.add(checkBoxShowAll);
-		components.add(checkBoxCopyToClipboard);
-		components.add(checkBoxShowNames);
-		components.add(checkBoxShowBackground);
-
-		components.add(labelBackgroundAlpha);
-		components.add(new JLabel("0"));
-		components.add(sliderBackgroundAlpha);
-		components.add(new JLabel("100"));
-
-		components.add(labelOverlayX);
-		components.add(new JLabel("0"));
-		components.add(sliderOverlayX);
-		components.add(new JLabel((int) screenSize.getWidth() + ""));
-
-		components.add(labelOverlayY);
-		components.add(new JLabel("0"));
-		components.add(sliderOverlayY);
-		components.add(new JLabel((int) screenSize.getHeight() + ""));
-
-		components.add(btnDashboard);
-		components.add(btnSaveSettings);
-		components.add(new JLabel(""));
-		components.add(new JLabel(""));
-
-		components.add(comboBoxOverlayClass);
-
-		btnOverlayWvw.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (overlay != null) {
-					overlay.toggleOverlay();
-					if (overlay.isVisible()) {
-						btnOverlayWvw.setText("Hide overlay");
-					} else {
-						btnOverlayWvw.setText("Show overlay");
-					}
-				}
-			}
-		});
-
-		comboBoxBorder.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (overlay != null) {
-					overlay.setBorder((Border) comboBoxBorder.getSelectedItem());
-				}
-			}
-		});
-
-		comboBoxOverlaySize.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (overlay != null) {
-					overlay.setSize((Overlay.Size) comboBoxOverlaySize
-							.getSelectedItem());
-					sliderOverlayX.setMaximum((int) screenSize.getWidth()
-							- overlay.getWidth());
-					sliderOverlayY.setMaximum((int) screenSize.getHeight()
-							- overlay.getHeight());
-				}
-			}
-		});
-
-		comboBoxOverlayType.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (overlay != null) {
-					overlay.setType((Overlay.Type) comboBoxOverlayType
-							.getSelectedItem());
-				}
-			}
-		});
-
-		comboBoxOverlayClass.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (overlay != null) {
-					overlay.setProf((Overlay.Class) comboBoxOverlayClass
-							.getSelectedItem());
-				}
-			}
-		});
-
-		checkBoxShowAll.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (overlay != null) {
-					overlay.toggleShowAll();
-				}
-			}
-		});
-
-		checkBoxCopyToClipboard.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (overlay != null) {
-					overlay.toggleCopyToClipboard();
-				}
-			}
-		});
-
-		checkBoxShowNames.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (overlay != null) {
-					overlay.toggleShowNames();
-				}
-			}
-		});
-
-		checkBoxShowBackground.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (overlay != null) {
-					overlay.toggleShowBackground();
-				}
-			}
-		});
-
-		sliderBackgroundAlpha.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				if (overlay != null) {
-					overlay.setBackgroundAlpha(sliderBackgroundAlpha.getValue());
-				}
-			}
-		});
-
-		sliderOverlayX.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				if (overlay != null) {
-					overlay.clearOverlayFrame();
-					guiOptions.setxLocation(sliderOverlayX.getValue());
-					overlay.updateOverlayFrame();
-				}
-			}
-		});
-
-		sliderOverlayY.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				if (overlay != null) {
-					overlay.clearOverlayFrame();
-					guiOptions.setyLocation(sliderOverlayY.getValue());
-					overlay.updateOverlayFrame();
-				}
 			}
 		});
 	}

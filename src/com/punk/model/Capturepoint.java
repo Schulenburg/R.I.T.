@@ -13,7 +13,6 @@ import javax.swing.JPanel;
 
 import com.punk.resources.Resources;
 import com.punk.start.Start;
-import com.punk.view.Overlay;
 import com.punk.view.RichJLabel;
 
 /**
@@ -209,64 +208,44 @@ public class Capturepoint {
 		riTime = 300 - riBufferTime;
 	}
 
-	public void createOverlay(Overlay.Type type, boolean showNames, double scale) {
+	public void createOverlay(boolean showNames, double scale) {
 		panelOverlay = new JPanel();
 		panelOverlay.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
 
-		switch (type) {
-		case Icons:
-			panelOverlay.setLayout(new GridBagLayout());
-			GridBagConstraints c = new GridBagConstraints();
-			c.anchor = GridBagConstraints.CENTER;
-			c.gridx = 0;
-			c.gridy = 0;
-			double fontScale = scale * FONTMULTIPLIER;
+		panelOverlay.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.CENTER;
+		c.gridx = 0;
+		c.gridy = 0;
+		double fontScale = scale * FONTMULTIPLIER;
 
-			if (showNames) {
-				labelOverlayName = new RichJLabel(name, 0);
-				labelOverlayName.setForeground(server);
-				labelOverlayName.setRightShadow(1, 1, Color.BLACK);
-				Font font = labelOverlayName.getFont();
-				labelOverlayName.setFont(new Font(font.getName(), font
-						.getStyle(), (int) (FONTSIZE * fontScale)));
-				c.gridy++;
-				panelOverlay.add(labelOverlayName, c);
-			}
-
-			labelOverlayIcon = new JLabel(Resources.IMAGE_CAMP_NEUTRAL);
-			labelOverlayIcon.setIcon(getImageIcon(scale));
-			panelOverlay.add(labelOverlayIcon, c);
-			c.gridy++;
-
-			labelOverlayTimer = new RichJLabel(getTimeAsString(riTime), 0);
-			labelOverlayTimer.setForeground(server);
-			labelOverlayTimer.setRightShadow(1, 1, Color.BLACK);
-			Font font = labelOverlayTimer.getFont();
-			labelOverlayTimer.setFont(new Font(font.getName(), font.getStyle(),
+		if (showNames) {
+			labelOverlayName = new RichJLabel(name, 0);
+			labelOverlayName.setForeground(server);
+			labelOverlayName.setRightShadow(1, 1, Color.BLACK);
+			Font font = labelOverlayName.getFont();
+			labelOverlayName.setFont(new Font(font.getName(), font.getStyle(),
 					(int) (FONTSIZE * fontScale)));
-			panelOverlay.add(labelOverlayTimer, c);
-			break;
-
-		case Text:
-			if (showNames) {
-				labelOverlayName = new RichJLabel(name, 0);
-				labelOverlayName.setForeground(server);
-				labelOverlayName.setRightShadow(1, 1, Color.BLACK);
-				panelOverlay.add(labelOverlayName);
-			}
-
-			labelOverlayTimer = new RichJLabel(getTimeAsString(riTime), 0);
-			labelOverlayTimer.setForeground(server);
-			labelOverlayTimer.setRightShadow(1, 1, Color.BLACK);
-			panelOverlay.add(labelOverlayTimer);
-			break;
+			c.gridy++;
+			panelOverlay.add(labelOverlayName, c);
 		}
 
-		panelOverlay.setVisible(true);
+		labelOverlayIcon = new JLabel(Resources.IMAGE_CAMP_NEUTRAL);
+		labelOverlayIcon.setIcon(getImageIcon(scale));
+		panelOverlay.add(labelOverlayIcon, c);
+		c.gridy++;
 
-		panelOverlay.setComponentZOrder(labelOverlayTimer, 0);
-		panelOverlay.setComponentZOrder(labelOverlayIcon, 2);
-		panelOverlay.setComponentZOrder(labelOverlayName, 1);
+		labelOverlayTimer = new RichJLabel(getTimeAsString(riTime), 0);
+		labelOverlayTimer.setForeground(server);
+		labelOverlayTimer.setRightShadow(1, 1, Color.BLACK);
+		Font font = labelOverlayTimer.getFont();
+		labelOverlayTimer.setFont(new Font(font.getName(), font.getStyle(),
+				(int) (FONTSIZE * fontScale)));
+		panelOverlay.add(labelOverlayTimer, c);
+		labelOverlayTimer.setVisible(true);
+		labelOverlayIcon.setVisible(true);
+		labelOverlayName.setVisible(true);
+		panelOverlay.setVisible(true);
 	}
 
 	public JPanel getOverlay() {
