@@ -143,6 +143,10 @@ public class MumbleLink {
 		return description;
 	}
 
+	public int getMapId() {
+		return context[28];
+	}
+
 	public static void main(String[] args) {
 		new MumbleLink();
 	}

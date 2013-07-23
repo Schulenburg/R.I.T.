@@ -39,11 +39,17 @@ public class GUI {
 			Overlay.Size.MEDIUM, Overlay.Size.SMALL };
 	private Overlay.Type[] comboOverlayTypeArray = { Overlay.Type.Icons,
 			Overlay.Type.Text };
+	private Overlay.Class[] comboOverlayClassArray = {
+			Overlay.Class.elementalist, Overlay.Class.engineer,
+			Overlay.Class.guardian, Overlay.Class.mesmer,
+			Overlay.Class.necromancer, Overlay.Class.ranger,
+			Overlay.Class.thief, Overlay.Class.warrior };
 
 	private JButton btnOverlayWvw;
 	private JComboBox<Border> comboBoxBorder;
 	private JComboBox<Overlay.Type> comboBoxOverlayType;
 	private JComboBox<Overlay.Size> comboBoxOverlaySize;
+	private JComboBox<Overlay.Class> comboBoxOverlayClass;
 	private JCheckBox checkBoxShowAll;
 	private JCheckBox checkBoxCopyToClipboard;
 	private JCheckBox checkBoxShowNames;
@@ -61,7 +67,7 @@ public class GUI {
 		frame = new JFrame("R.I.T.");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLayout(new BorderLayout());
-		frame.setSize(600, 150);
+		frame.setSize(600, 200);
 		JPanel components = new JPanel();
 		components.setLayout(new GridLayout(0, 4));
 
@@ -83,6 +89,8 @@ public class GUI {
 		comboBoxBorder = new JComboBox<Border>(comboBorderArray);
 		comboBoxOverlaySize = new JComboBox<Overlay.Size>(comboOverlaySizeArray);
 		comboBoxOverlayType = new JComboBox<Overlay.Type>(comboOverlayTypeArray);
+		comboBoxOverlayClass = new JComboBox<Overlay.Class>(
+				comboOverlayClassArray);
 		checkBoxShowAll = new JCheckBox("Show all", true);
 		checkBoxCopyToClipboard = new JCheckBox("Copy to clipboard", false);
 		checkBoxShowNames = new JCheckBox("Show Names", true);
@@ -133,6 +141,8 @@ public class GUI {
 		components.add(new JLabel(""));
 		components.add(new JLabel(""));
 
+		components.add(comboBoxOverlayClass);
+
 		btnOverlayWvw.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (overlay != null) {
@@ -171,6 +181,15 @@ public class GUI {
 			public void actionPerformed(ActionEvent e) {
 				if (overlay != null) {
 					overlay.setType((Overlay.Type) comboBoxOverlayType
+							.getSelectedItem());
+				}
+			}
+		});
+
+		comboBoxOverlayClass.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (overlay != null) {
+					overlay.setProf((Overlay.Class) comboBoxOverlayClass
 							.getSelectedItem());
 				}
 			}

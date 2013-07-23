@@ -263,6 +263,10 @@ public class Capturepoint {
 		}
 
 		panelOverlay.setVisible(true);
+
+		panelOverlay.setComponentZOrder(labelOverlayTimer, 0);
+		panelOverlay.setComponentZOrder(labelOverlayIcon, 2);
+		panelOverlay.setComponentZOrder(labelOverlayName, 1);
 	}
 
 	public JPanel getOverlay() {
