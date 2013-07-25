@@ -117,7 +117,7 @@ public class Overlay extends Thread {
 		overlayFrame.add(overlayPanel, BorderLayout.CENTER);
 
 		nextUpdateBar.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
-		nextUpdateBar.setForeground(new Color(1.0f, 0.8f, 0.0f, 0.5f));
+		nextUpdateBar.setForeground(Capturepoint.GRAY);
 		nextUpdateBar.setBorderPainted(false);
 		overlayFrame.add(nextUpdateBar, BorderLayout.SOUTH);
 
@@ -163,6 +163,20 @@ public class Overlay extends Thread {
 		clearOverlayFrame();
 
 		this.border = border;
+		switch (border) {
+		case GREEN:
+			nextUpdateBar.setForeground(Capturepoint.GREEN);
+			break;
+		case BLUE:
+			nextUpdateBar.setForeground(Capturepoint.BLUE);
+			break;
+		case RED:
+			nextUpdateBar.setForeground(Capturepoint.RED);
+			break;
+		default:
+			nextUpdateBar.setForeground(Capturepoint.GRAY);
+			break;
+		}
 
 		updateOverlayFrame();
 	}
@@ -479,8 +493,7 @@ public class Overlay extends Thread {
 							players.get(key).getToolTipText().split(",")[4]);
 
 					players.get(key).setFont(
-							new Font(players.get(key).getFont().getName(),
-									players.get(key).getFont().getStyle(), 10));
+							new Font(Font.SANS_SERIF, Font.BOLD, 10));
 
 					ImageIcon icon = getProfIcon(players.get(key)
 							.getToolTipText().split(",")[3]);
@@ -506,17 +519,35 @@ public class Overlay extends Thread {
 	}
 
 	private void updateCapturePoints() {
-		String currentTimers = "Timers: ";
+		String currentTimers = "Timers:";
+		String timersRed = " Red: ";
+		String timersBlue = " | Blue: ";
+		String timersGreen = " | Green: ";
 		for (Capturepoint cap : capUtil.getCapturepoints(border)) {
 			if (cap.getRiTime() > 0 && copyToClipboard) {
-				currentTimers += cap.getChatcode() + " = " + cap.getTimer()
-						+ " ";
+				if (cap.getServer() == Capturepoint.RED) {
+					timersRed += cap.getChatcode() + " = " + cap.getTimer()
+							+ " ";
+				} else if (cap.getServer() == Capturepoint.BLUE) {
+					timersBlue += cap.getChatcode() + " = " + cap.getTimer()
+							+ " ";
+				} else if (cap.getServer() == Capturepoint.GREEN) {
+					timersGreen += cap.getChatcode() + " = " + cap.getTimer()
+							+ " ";
+				}
 			}
 		}
 		if (copyToClipboard) {
-			if (currentTimers.equals("Timers: ")) {
-				currentTimers += "None";
+			if (timersRed.equals(" Red: ")) {
+				timersRed += "None";
 			}
+			if (timersBlue.equals(" | Blue: ")) {
+				timersBlue += "None";
+			}
+			if (timersGreen.equals(" | Green: ")) {
+				timersGreen += "None";
+			}
+			currentTimers += timersRed + timersBlue + timersGreen;
 			try {
 				StringSelection stringSelection = new StringSelection(
 						currentTimers);
