@@ -67,7 +67,7 @@ public class Overlay extends Thread {
 	private Border border = null;
 	private Size size = null;
 	private Class prof = Class.elementalist;
-	private boolean showNames = true;
+	private boolean showNames = false;
 	private boolean showBackground = true;
 	private boolean copyToClipboard = false;
 
@@ -125,6 +125,11 @@ public class Overlay extends Thread {
 
 		timer = new Timer();
 		timer.schedule(new updateTimers(), 0, 1000);
+	}
+
+	public void setLocation(int x, int y) {
+		overlayFrame.setLocation(x - overlayFrame.getWidth(),
+				y - overlayFrame.getHeight());
 	}
 
 	private void applyPosition() {
@@ -385,7 +390,7 @@ public class Overlay extends Thread {
 			}
 		}
 
-		if (socket == null) {
+		if (socket == null || socket.isClosed()) {
 			handleLocalLocation(playerX, playerZ);
 		} else {
 			handleNetworkLocation(socket, data);
@@ -429,20 +434,23 @@ public class Overlay extends Thread {
 		PrintWriter out = null;
 
 		try {
-			// Create the streams to send and receive information
 			in = new ObjectInputStream(socket.getInputStream());
 			out = new PrintWriter(new OutputStreamWriter(
 					socket.getOutputStream()));
-
-			// Since this is the client, we will initiate the talking.
-			// Send a string data and flush
 			out.println(data);
 			out.flush();
-			// Receive the reply.
 
 			try {
+				@SuppressWarnings("unchecked")
 				HashMap<String, JLabel> playersServer = (HashMap<String, JLabel>) in
 						.readObject();
+				for (String key : players.keySet()) {
+					if (!playersServer.containsKey(key)) {
+						overlayPanel.remove(players.get(key));
+						players.remove(key);
+					}
+				}
+
 				for (String key : playersServer.keySet()) {
 					if (!players.containsKey(key)) {
 						players.put(key, playersServer.get(key));
@@ -454,13 +462,10 @@ public class Overlay extends Thread {
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
-
-			// Send the special string to tell server to quit.
 			out.println("Quit");
 			out.flush();
-		} catch (IOException ioe) {
-			System.out
-					.println("Exception during communication. Server probably closed connection.");
+		} catch (IOException e) {
+			e.printStackTrace();
 		} finally {
 			try {
 				out.close();
@@ -547,7 +552,8 @@ public class Overlay extends Thread {
 			if (timersGreen.equals(" | Green: ")) {
 				timersGreen += "None";
 			}
-			currentTimers += timersRed + timersBlue + timersGreen;
+			currentTimers += timersRed + timersBlue + timersGreen
+					+ " //Powered by: R.I.T.";
 			try {
 				StringSelection stringSelection = new StringSelection(
 						currentTimers);

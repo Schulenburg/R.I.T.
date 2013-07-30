@@ -228,6 +228,7 @@ public class Capturepoint {
 					(int) (FONTSIZE * fontScale)));
 			c.gridy++;
 			panelOverlay.add(labelOverlayName, c);
+			labelOverlayName.setVisible(true);
 		}
 
 		labelOverlayIcon = new JLabel(Resources.IMAGE_CAMP_NEUTRAL);
@@ -244,7 +245,6 @@ public class Capturepoint {
 		panelOverlay.add(labelOverlayTimer, c);
 		labelOverlayTimer.setVisible(true);
 		labelOverlayIcon.setVisible(true);
-		labelOverlayName.setVisible(true);
 		panelOverlay.setVisible(true);
 	}
 

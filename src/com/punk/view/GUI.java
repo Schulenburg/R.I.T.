@@ -2,7 +2,10 @@ package com.punk.view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,9 +35,13 @@ import com.punk.view.Overlay.Size;
  */
 public class GUI {
 
+	private JFrame frame;
+
 	private final String credits = "Created by: Much, WhiteFang";
 	private final Dimension screenSize = Toolkit.getDefaultToolkit()
 			.getScreenSize();
+	private GraphicsEnvironment ge = GraphicsEnvironment
+			.getLocalGraphicsEnvironment();
 
 	private GuiOptions guiOptions = GuiOptions.getInstance();
 	private Overlay overlay = null;
@@ -51,7 +58,7 @@ public class GUI {
 	private JButton btnOverlayWvw;
 	private JComboBox<Border> comboBoxBorder;
 	private JComboBox<Overlay.Size> comboBoxOverlaySize;
-	private JComboBox<Overlay.Class> comboBoxOverlayClass;
+	private JComboBox<String> comboBoxScreens;
 
 	private JCheckBox checkBoxShowBackground;
 	private JCheckBox checkBoxShowNames;
@@ -68,6 +75,8 @@ public class GUI {
 	private JLabel labelOverlayY;
 	private JSlider sliderOverlayY;
 	private JLabel labelOverlayYCurrent;
+
+	private JComboBox<Overlay.Class> comboBoxOverlayClass;
 
 	private JLabel labelChannel;
 	private JTextField txtChannel;
@@ -89,10 +98,10 @@ public class GUI {
 		addMenu(components);
 		components.setVisible(true);
 
-		JFrame frame = new JFrame("R.I.T.");
+		frame = new JFrame("R.I.T.");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLayout(new BorderLayout());
-		frame.setSize(650, 200);
+		frame.setSize(650, 250);
 		frame.add(components, BorderLayout.CENTER);
 		frame.add(new JLabel(credits), BorderLayout.SOUTH);
 		frame.setVisible(true);
@@ -104,11 +113,14 @@ public class GUI {
 		btnOverlayWvw = new JButton("Show overlay");
 		comboBoxBorder = new JComboBox<Border>(comboBorderArray);
 		comboBoxOverlaySize = new JComboBox<Overlay.Size>(comboOverlaySizeArray);
-		comboBoxOverlayClass = new JComboBox<Overlay.Class>(
-				comboOverlayClassArray);
+		String[] monitorNames = new String[ge.getScreenDevices().length];
+		for (int i = 0; i < ge.getScreenDevices().length; i++) {
+			monitorNames[i] = ge.getScreenDevices()[i].getIDstring();
+		}
+		comboBoxScreens = new JComboBox<String>(monitorNames);
 
 		checkBoxCopyToClipboard = new JCheckBox("Copy to clipboard", false);
-		checkBoxShowNames = new JCheckBox("Show Names", true);
+		checkBoxShowNames = new JCheckBox("Show Names", false);
 		checkBoxShowBackground = new JCheckBox("Show Map", true);
 
 		labelBackgroundAlpha = new JLabel("Map Alpha:");
@@ -127,6 +139,9 @@ public class GUI {
 				- overlay.getHeight());
 		labelOverlayYCurrent = new JLabel(sliderOverlayY.getMaximum() + "");
 
+		comboBoxOverlayClass = new JComboBox<Overlay.Class>(
+				comboOverlayClassArray);
+
 		labelChannel = new JLabel("Channel");
 		txtChannel = new JTextField("Public");
 
@@ -140,7 +155,7 @@ public class GUI {
 		components.add(btnOverlayWvw);
 		components.add(comboBoxBorder);
 		components.add(comboBoxOverlaySize);
-		components.add(comboBoxOverlayClass);
+		components.add(comboBoxScreens);
 
 		components.add(checkBoxShowNames);
 		components.add(checkBoxShowBackground);
@@ -161,6 +176,16 @@ public class GUI {
 		components.add(new JLabel("0 - " + (int) screenSize.getHeight()));
 		components.add(sliderOverlayY);
 		components.add(labelOverlayYCurrent);
+
+		components.add(new JLabel());
+		components.add(new JLabel());
+		components.add(new JLabel());
+		components.add(new JLabel());
+
+		components.add(new JLabel("Profession"));
+		components.add(comboBoxOverlayClass);
+		components.add(new JLabel());
+		components.add(new JLabel());
 
 		components.add(labelChannel);
 		components.add(txtChannel);
@@ -207,6 +232,43 @@ public class GUI {
 							- overlay.getWidth());
 					sliderOverlayY.setMaximum((int) screenSize.getHeight()
 							- overlay.getHeight());
+				}
+			}
+		});
+
+		comboBoxScreens.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (overlay != null) {
+					GraphicsDevice gd = ge.getScreenDevices()[comboBoxScreens
+							.getSelectedIndex()];
+					Point screenTopLeft = gd.getDefaultConfiguration()
+							.getBounds().getLocation();
+
+					int width = gd.getDisplayMode().getWidth();
+					int height = gd.getDisplayMode().getHeight();
+
+					int xLocation = screenTopLeft.x + width;
+					int yLocation = screenTopLeft.y + height;
+
+					guiOptions.setxLocation(xLocation);
+					guiOptions.setyLocation(yLocation);
+
+					labelOverlayX.setText("0 - " + width);
+					labelOverlayY.setText("0 - " + height);
+
+					labelOverlayXCurrent.setText(xLocation + "");
+					labelOverlayYCurrent.setText(yLocation + "");
+
+					sliderOverlayX.setMinimum(screenTopLeft.x);
+					sliderOverlayY.setMinimum(screenTopLeft.y);
+
+					sliderOverlayX.setMaximum(xLocation - overlay.getWidth());
+					sliderOverlayY.setMaximum(yLocation - overlay.getHeight());
+
+					sliderOverlayX.setValue(xLocation - overlay.getWidth());
+					sliderOverlayY.setValue(yLocation - overlay.getHeight());
+
+					overlay.setLocation(xLocation, yLocation);
 				}
 			}
 		});
