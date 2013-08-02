@@ -29,22 +29,19 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SpringLayout;
 
-import com.punk.model.Border;
+import com.melloware.jintellitype.JIntellitype;
 import com.punk.model.Capturepoint;
 import com.punk.model.CapturepointsUtil;
 import com.punk.model.GuiOptions;
 import com.punk.mumblelink.MumbleLink;
 import com.punk.resources.Resources;
 import com.punk.start.Start;
+import com.punk.start.Start.Border;
 
 /**
  * @author Sander Schulenburg aka "Much"(schulenburgsander@gmail.com)
  */
 public class Overlay extends Thread {
-
-	// private final String ip = "83.247.54.28";
-
-	private final String ip = "127.0.0.1";
 
 	public enum Type {
 		Text, Icons
@@ -125,6 +122,9 @@ public class Overlay extends Thread {
 
 		timer = new Timer();
 		timer.schedule(new updateTimers(), 0, 1000);
+
+		JIntellitype jintel = JIntellitype.getInstance();
+		jintel.registerHotKey(1, JIntellitype.MOD_ALT, (int) '1');
 	}
 
 	public void setLocation(int x, int y) {
@@ -380,7 +380,7 @@ public class Overlay extends Thread {
 
 		if (guiOptions.isTrack()) {
 			try {
-				socket = new Socket(ip, 11111);
+				socket = new Socket(Start.ip, 11111);
 			} catch (UnknownHostException uhe) {
 				// Server Host unreachable
 				socket = null;

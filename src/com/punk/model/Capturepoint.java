@@ -6,6 +6,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Point;
+import java.io.Serializable;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -18,7 +19,10 @@ import com.punk.view.RichJLabel;
 /**
  * @author Sander Schulenburg aka "Much"(schulenburgsander@gmail.com)
  */
-public class Capturepoint {
+public class Capturepoint implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
 	public static final Color RED = new Color(242, 109, 125);
 	public static final Color BLUE = new Color(0, 174, 239);
 	public static final Color GREEN = new Color(141, 198, 63);

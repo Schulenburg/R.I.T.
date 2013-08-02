@@ -11,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -25,9 +27,9 @@ import javax.swing.event.ChangeListener;
 
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.JIntellitype;
-import com.punk.model.Border;
 import com.punk.model.CapturepointsUtil;
 import com.punk.model.GuiOptions;
+import com.punk.start.Start.Border;
 import com.punk.view.Overlay.Size;
 
 /**
@@ -88,6 +90,8 @@ public class GUI {
 	private JCheckBox checkboxTrack;
 	private JButton btnUpdateTrackSettings;
 
+	private Timer checkGuiOptionsTimer;
+
 	public GUI(CapturepointsUtil capUtil) {
 		overlay = new Overlay(capUtil, Border.EB, Overlay.Type.Icons,
 				Overlay.Size.LARGE);
@@ -107,6 +111,9 @@ public class GUI {
 		frame.setVisible(true);
 
 		setHotkeys();
+
+		checkGuiOptionsTimer = new Timer();
+		checkGuiOptionsTimer.schedule(new checkGuiOptions(), 0, 1000);
 	}
 
 	private void addMenu(JPanel components) {
@@ -124,8 +131,8 @@ public class GUI {
 		checkBoxShowBackground = new JCheckBox("Show Map", true);
 
 		labelBackgroundAlpha = new JLabel("Map Alpha:");
-		sliderBackgroundAlpha = new JSlider(0, 100, 75);
-		labelBackgroundAlphaCurrent = new JLabel("75");
+		sliderBackgroundAlpha = new JSlider(0, 100, 100);
+		labelBackgroundAlphaCurrent = new JLabel("100");
 
 		labelOverlayX = new JLabel("Map horizontal location:");
 		sliderOverlayX = new JSlider(0, (int) screenSize.getWidth()
@@ -369,6 +376,14 @@ public class GUI {
 				guiOptions.setTrack(checkboxTrack.isSelected());
 			}
 		});
+
+		checkboxTrack.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				guiOptions.setTrack(checkboxTrack.isSelected());
+			}
+		});
 	}
 
 	private void setHotkeys() {
@@ -425,5 +440,14 @@ public class GUI {
 
 			}
 		});
+	}
+
+	private class checkGuiOptions extends TimerTask {
+		public void run() {
+			if (guiOptions.isTrack() != checkboxTrack.isSelected()) {
+				checkboxTrack.setSelected(guiOptions.isTrack());
+			}
+
+		}
 	}
 }

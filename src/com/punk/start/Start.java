@@ -11,7 +11,6 @@ import java.util.TimerTask;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import com.punk.model.Border;
 import com.punk.model.Capturepoint;
 import com.punk.model.CapturepointsUtil;
 import com.punk.resources.Resources;
@@ -20,6 +19,12 @@ import com.punk.view.GUI;
 //TODO: retry after API failure
 
 public class Start {
+
+	// public final static String ip = "83.247.54.28";
+
+	// public final static String ip = "127.0.0.1";
+
+	public final static String ip = "192.168.2.200";
 
 	public static final int API_REFRESH_DELAY = 15000;
 	public static int nextAPICall = API_REFRESH_DELAY / 1000;
@@ -30,6 +35,10 @@ public class Start {
 
 	private static CapturepointsUtil capUtil;
 	private static Timer timer = null;
+
+	public enum Border {
+		EB, RED, GREEN, BLUE;
+	}
 
 	/**
 	 * @author Sander Schulenburg aka "Much"(schulenburgsander@gmail.com)

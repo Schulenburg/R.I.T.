@@ -6,7 +6,7 @@ public class GuiOptions {
 
 	private int xLocation;
 	private int yLocation;
-	private int backgroundAlpha = 75;
+	private int backgroundAlpha = 100;
 
 	private boolean change = false;
 
