@@ -11,8 +11,7 @@ public class GuiOptions {
 	private boolean change = false;
 
 	private String channel = "Public";
-	private String nickname = "Guest";
-	private boolean track = false;
+	private String nickname = "";
 
 	protected GuiOptions() {
 
@@ -74,14 +73,6 @@ public class GuiOptions {
 
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
-	}
-
-	public boolean isTrack() {
-		return track;
-	}
-
-	public void setTrack(boolean track) {
-		this.track = track;
 	}
 
 }

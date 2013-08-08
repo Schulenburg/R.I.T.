@@ -28,6 +28,13 @@ public class MumbleLink {
 	private byte[] context;
 	private char[] description;
 
+	private String charName;
+	private int profession;
+	private int mapId;
+	private String worldId;
+	private int teamColor;
+	private boolean isCommander;
+
 	public MumbleLink() {
 		final String name = "MumbleLink";
 
@@ -60,6 +67,34 @@ public class MumbleLink {
 				identity = sharedMemory.getCharArray(592, 256);
 				context_len = sharedMemory.getInt(1104);
 				context = sharedMemory.getByteArray(1108, 256);
+
+				String identityString = "";
+				for (char c : identity) {
+					identityString += c;
+				}
+
+				identityString = identityString.replace("{", "");
+				if (identityString.contains("}")) {
+					identityString = identityString.substring(0,
+							identityString.indexOf("}"));
+					String[] identityInfo = identityString.split(",");
+
+					charName = identityInfo[0].split(": ")[1].replace("\"", "")
+							.trim();
+					profession = Integer
+							.parseInt(identityInfo[1].split(": ")[1].replace(
+									"\"", "").trim());
+					mapId = Integer.parseInt(identityInfo[2].split(": ")[1]
+							.replace("\"", "").trim());
+					worldId = identityInfo[3].split(": ")[1].replace("\"", "")
+							.trim();
+					teamColor = Integer.parseInt(identityInfo[4].split(":")[1]
+							.replace("\"", "").trim());
+
+					isCommander = Boolean.parseBoolean(identityInfo[5]
+							.split(": ")[1].replace("\"", "").trim());
+
+				}
 			}
 			// System.out.println("fAvatarPosition "
 			// + Arrays.toString(fAvatarPosition));
@@ -72,20 +107,20 @@ public class MumbleLink {
 	}
 
 	public void print() {
-		System.out.println("uiVersion " + uiVersion);
-		System.out.println("uiTick " + uiTick);
-		System.out.println("fAvatarPosition "
-				+ Arrays.toString(fAvatarPosition));
-		System.out.println("fAvatarFront " + Arrays.toString(fAvatarFront));
-		System.out.println("fAvatarTop " + Arrays.toString(fAvatarTop));
-		System.out.println("name " + Arrays.toString(name));
-		System.out.println("fCameraPosition "
-				+ Arrays.toString(fCameraPosition));
-		System.out.println("fCameraFront " + Arrays.toString(fCameraFront));
-		System.out.println("fCameraTop " + Arrays.toString(fCameraTop));
-		System.out.println("identity " + Arrays.toString(identity));
-		System.out.println("context_len " + context_len);
-		System.out.println("context " + Arrays.toString(context));
+		// System.out.println("uiVersion " + uiVersion);
+		// System.out.println("uiTick " + uiTick);
+		// System.out.println("fAvatarPosition "
+		// + Arrays.toString(fAvatarPosition));
+		// System.out.println("fAvatarFront " + Arrays.toString(fAvatarFront));
+		// System.out.println("fAvatarTop " + Arrays.toString(fAvatarTop));
+		// System.out.println("name " + Arrays.toString(name));
+		// System.out.println("fCameraPosition "
+		// + Arrays.toString(fCameraPosition));
+		// System.out.println("fCameraFront " + Arrays.toString(fCameraFront));
+		// System.out.println("fCameraTop " + Arrays.toString(fCameraTop));
+		// System.out.println("identity " + Arrays.toString(identity));
+		// System.out.println("context_len " + context_len);
+		// System.out.println("context " + Arrays.toString(context));
 
 		System.out
 				.println("description " + Arrays.toString(description) + "\n");
@@ -143,8 +178,31 @@ public class MumbleLink {
 		return description;
 	}
 
+	public String getCharName() {
+		return charName;
+	}
+
+	public int getProfession() {
+		if (isCommander) {
+			return 0;
+		}
+		return profession;
+	}
+
 	public int getMapId() {
-		return context[28];
+		return mapId;
+	}
+
+	public String getWorldId() {
+		return worldId;
+	}
+
+	public int getTeamColor() {
+		return teamColor;
+	}
+
+	public boolean isCommander() {
+		return isCommander;
 	}
 
 	public static void main(String[] args) {

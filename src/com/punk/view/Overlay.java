@@ -51,10 +51,6 @@ public class Overlay extends Thread {
 		SMALL, MEDIUM, LARGE
 	}
 
-	public enum Class {
-		elementalist, engineer, guardian, mesmer, necromancer, ranger, thief, warrior
-	}
-
 	private SpringLayout overlayPanelSpringLayout = null;
 	private JFrame overlayFrame = null;
 	private RichJPanel overlayPanel = null;
@@ -63,7 +59,6 @@ public class Overlay extends Thread {
 	private CapturepointsUtil capUtil = null;
 	private Border border = null;
 	private Size size = null;
-	private Class prof = Class.elementalist;
 	private boolean showNames = false;
 	private boolean showBackground = true;
 	private boolean copyToClipboard = false;
@@ -277,50 +272,26 @@ public class Overlay extends Thread {
 		updateOverlayFrame();
 	}
 
-	public void setProf(Class prof) {
-		this.prof = prof;
-	}
-
-	public ImageIcon getProfIcon(String prof) {
+	public ImageIcon getProfIcon(int prof) {
 		switch (prof) {
-		case "elementalist":
-			return getProfIcon(Class.elementalist);
-		case "engineer":
-			return getProfIcon(Class.engineer);
-		case "guardian":
-			return getProfIcon(Class.guardian);
-		case "mesmer":
-			return getProfIcon(Class.mesmer);
-		case "necromancer":
-			return getProfIcon(Class.necromancer);
-		case "ranger":
-			return getProfIcon(Class.ranger);
-		case "thief":
-			return getProfIcon(Class.thief);
-		case "warrior":
-			return getProfIcon(Class.warrior);
-		}
-		return null;
-	}
-
-	public ImageIcon getProfIcon(Class prof) {
-		switch (prof) {
-		case elementalist:
-			return Resources.IMAGE_CLASS_ELEMENTALIST;
-		case engineer:
-			return Resources.IMAGE_CLASS_ENGINEER;
-		case guardian:
+		case 0:
+			return Resources.IMAGE_COMMANDER;
+		case 1:
 			return Resources.IMAGE_CLASS_GUARDIAN;
-		case mesmer:
-			return Resources.IMAGE_CLASS_MESMER;
-		case necromancer:
-			return Resources.IMAGE_CLASS_NECROMANCER;
-		case ranger:
-			return Resources.IMAGE_CLASS_RANGER;
-		case thief:
-			return Resources.IMAGE_CLASS_THIEF;
-		case warrior:
+		case 2:
 			return Resources.IMAGE_CLASS_WARRIOR;
+		case 3:
+			return Resources.IMAGE_CLASS_ENGINEER;
+		case 4:
+			return Resources.IMAGE_CLASS_RANGER;
+		case 5:
+			return Resources.IMAGE_CLASS_THIEF;
+		case 6:
+			return Resources.IMAGE_CLASS_ELEMENTALIST;
+		case 7:
+			return Resources.IMAGE_CLASS_MESMER;
+		case 8:
+			return Resources.IMAGE_CLASS_NECROMANCER;
 		}
 		return null;
 	}
@@ -368,26 +339,21 @@ public class Overlay extends Thread {
 
 		double playerZ = (mumbleLink.getfAvatarPosition()[2] * 39.3700787);
 
-		String playername = "";
-		for (char c : mumbleLink.getIdentity()) {
-			playername += c;
-		}
-		playername = playername.trim();
-		String data = playername + "," + playerX + "," + playerZ + ","
-				+ mumbleLink.getMapId() + "," + prof.toString() + ","
-				+ guiOptions.getNickname() + "," + guiOptions.getChannel();
+		String data = mumbleLink.getCharName() + "," + playerX + "," + playerZ
+				+ "," + mumbleLink.getMapId() + ","
+				+ mumbleLink.getProfession() + "," + guiOptions.getNickname()
+				+ "," + guiOptions.getChannel() + "-" + mumbleLink.getWorldId()
+				+ "-" + mumbleLink.getTeamColor();
 		Socket socket = null;
 
-		if (guiOptions.isTrack()) {
-			try {
-				socket = new Socket(Start.ip, 11111);
-			} catch (UnknownHostException uhe) {
-				// Server Host unreachable
-				socket = null;
-			} catch (IOException ioe) {
-				// Cannot connect to port on given server host
-				socket = null;
-			}
+		try {
+			socket = new Socket(Start.ip, 11111);
+		} catch (UnknownHostException uhe) {
+			// Server Host unreachable
+			socket = null;
+		} catch (IOException ioe) {
+			// Cannot connect to port on given server host
+			socket = null;
 		}
 
 		if (socket == null || socket.isClosed()) {
@@ -403,15 +369,16 @@ public class Overlay extends Thread {
 		int locationZ = (int) (((getHeight()) / getMapHeight()) * (playerZ * -1))
 				+ (getHeight() / 2);
 
-		ImageIcon icon = new ImageIcon(
-				getProfIcon(prof).getImage().getScaledInstance(
-						(int) (Resources.IMAGE_CLASS_ELEMENTALIST
-								.getIconWidth() * getSizeMultiplier()),
-						(int) (Resources.IMAGE_CLASS_ELEMENTALIST
-								.getIconHeight() * getSizeMultiplier()),
-						Image.SCALE_SMOOTH));
-
-		labelPlayer.setIcon(icon);
+		ImageIcon icon = getProfIcon(mumbleLink.getProfession());
+		labelPlayer
+				.setIcon(new ImageIcon(
+						icon.getImage()
+								.getScaledInstance(
+										(int) (Resources.IMAGE_COMMANDER
+												.getIconWidth() * getSizeMultiplier()),
+										(int) (Resources.IMAGE_COMMANDER
+												.getIconHeight() * getSizeMultiplier()),
+										Image.SCALE_SMOOTH)));
 
 		for (String key : players.keySet()) {
 			overlayPanel.remove(players.get(key));
@@ -482,7 +449,9 @@ public class Overlay extends Thread {
 			if (Integer
 					.parseInt(players.get(key).getToolTipText().split(",")[2]) == getBorderId()) {
 				if (players.get(key).getToolTipText().split(",")[5]
-						.equals(guiOptions.getChannel())) {
+						.equals(guiOptions.getChannel() + "-"
+								+ mumbleLink.getWorldId() + "-"
+								+ mumbleLink.getTeamColor())) {
 
 					double pX = Double.parseDouble(players.get(key)
 							.getToolTipText().split(",")[0]);
@@ -500,13 +469,18 @@ public class Overlay extends Thread {
 					players.get(key).setFont(
 							new Font(Font.SANS_SERIF, Font.BOLD, 10));
 
-					ImageIcon icon = getProfIcon(players.get(key)
-							.getToolTipText().split(",")[3]);
-					players.get(key).setIcon(
-							new ImageIcon(icon.getImage().getScaledInstance(
-									(int) (16 * getSizeMultiplier()),
-									(int) (16 * getSizeMultiplier()),
-									Image.SCALE_SMOOTH)));
+					ImageIcon icon = getProfIcon(Integer.parseInt(players
+							.get(key).getToolTipText().split(",")[3]));
+					players.get(key)
+							.setIcon(
+									new ImageIcon(
+											icon.getImage()
+													.getScaledInstance(
+															(int) (Resources.IMAGE_COMMANDER
+																	.getIconWidth() * getSizeMultiplier()),
+															(int) (Resources.IMAGE_COMMANDER
+																	.getIconHeight() * getSizeMultiplier()),
+															Image.SCALE_SMOOTH)));
 
 					overlayPanel.add(players.get(key));
 					overlayPanel.setComponentZOrder(players.get(key), 0);

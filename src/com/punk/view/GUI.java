@@ -11,8 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -51,11 +49,6 @@ public class GUI {
 			Border.BLUE };
 	private Overlay.Size[] comboOverlaySizeArray = { Overlay.Size.LARGE,
 			Overlay.Size.MEDIUM, Overlay.Size.SMALL };
-	private Overlay.Class[] comboOverlayClassArray = {
-			Overlay.Class.elementalist, Overlay.Class.engineer,
-			Overlay.Class.guardian, Overlay.Class.mesmer,
-			Overlay.Class.necromancer, Overlay.Class.ranger,
-			Overlay.Class.thief, Overlay.Class.warrior };
 
 	private JButton btnOverlayWvw;
 	private JComboBox<Border> comboBoxBorder;
@@ -78,8 +71,6 @@ public class GUI {
 	private JSlider sliderOverlayY;
 	private JLabel labelOverlayYCurrent;
 
-	private JComboBox<Overlay.Class> comboBoxOverlayClass;
-
 	private JLabel labelChannel;
 	private JTextField txtChannel;
 
@@ -87,10 +78,9 @@ public class GUI {
 	private JTextField txtNickname;
 	private JLabel labelNicknameLimit;
 
-	private JCheckBox checkboxTrack;
 	private JButton btnUpdateTrackSettings;
 
-	private Timer checkGuiOptionsTimer;
+	// private Timer checkGuiOptionsTimer;
 
 	public GUI(CapturepointsUtil capUtil) {
 		overlay = new Overlay(capUtil, Border.EB, Overlay.Type.Icons,
@@ -112,8 +102,8 @@ public class GUI {
 
 		setHotkeys();
 
-		checkGuiOptionsTimer = new Timer();
-		checkGuiOptionsTimer.schedule(new checkGuiOptions(), 0, 1000);
+		// checkGuiOptionsTimer = new Timer();
+		// checkGuiOptionsTimer.schedule(new checkGuiOptions(), 0, 1000);
 	}
 
 	private void addMenu(JPanel components) {
@@ -146,17 +136,13 @@ public class GUI {
 				- overlay.getHeight());
 		labelOverlayYCurrent = new JLabel(sliderOverlayY.getMaximum() + "");
 
-		comboBoxOverlayClass = new JComboBox<Overlay.Class>(
-				comboOverlayClassArray);
-
 		labelChannel = new JLabel("Channel");
 		txtChannel = new JTextField("Public");
 
 		labelNickname = new JLabel("Nickname");
-		txtNickname = new JTextField("Guest", 5);
-		labelNicknameLimit = new JLabel("(5 char max)");
+		txtNickname = new JTextField("");
+		labelNicknameLimit = new JLabel("Optional (5 char max)");
 
-		checkboxTrack = new JCheckBox("Send location online", false);
 		btnUpdateTrackSettings = new JButton("Update track settings");
 
 		components.add(btnOverlayWvw);
@@ -189,11 +175,6 @@ public class GUI {
 		components.add(new JLabel());
 		components.add(new JLabel());
 
-		components.add(new JLabel("Profession"));
-		components.add(comboBoxOverlayClass);
-		components.add(new JLabel());
-		components.add(new JLabel());
-
 		components.add(labelChannel);
 		components.add(txtChannel);
 		components.add(new JLabel());
@@ -204,8 +185,8 @@ public class GUI {
 		components.add(labelNicknameLimit);
 		components.add(new JLabel());
 
-		components.add(checkboxTrack);
 		components.add(btnUpdateTrackSettings);
+		components.add(new JLabel());
 		components.add(new JLabel());
 		components.add(new JLabel());
 
@@ -280,15 +261,6 @@ public class GUI {
 			}
 		});
 
-		comboBoxOverlayClass.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (overlay != null) {
-					overlay.setProf((Overlay.Class) comboBoxOverlayClass
-							.getSelectedItem());
-				}
-			}
-		});
-
 		checkBoxCopyToClipboard.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (overlay != null) {
@@ -349,12 +321,9 @@ public class GUI {
 		});
 
 		txtNickname.addKeyListener(new KeyListener() {
-
-			@Override
 			public void keyTyped(KeyEvent arg0) {
 			}
 
-			@Override
 			public void keyReleased(KeyEvent arg0) {
 				if (txtNickname.getText().length() > 5) {
 					txtNickname.setText(txtNickname.getText().substring(0, 5));
@@ -362,28 +331,17 @@ public class GUI {
 
 			}
 
-			@Override
 			public void keyPressed(KeyEvent arg0) {
 			}
 		});
 
 		btnUpdateTrackSettings.addActionListener(new ActionListener() {
-
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				guiOptions.setNickname(txtNickname.getText());
 				guiOptions.setChannel(txtChannel.getText());
-				guiOptions.setTrack(checkboxTrack.isSelected());
 			}
 		});
 
-		checkboxTrack.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				guiOptions.setTrack(checkboxTrack.isSelected());
-			}
-		});
 	}
 
 	private void setHotkeys() {
@@ -396,6 +354,9 @@ public class GUI {
 		jintel.registerHotKey(5, JIntellitype.MOD_ALT, (int) KeyEvent.VK_RIGHT);
 		jintel.registerHotKey(6, JIntellitype.MOD_ALT, (int) KeyEvent.VK_UP);
 		jintel.registerHotKey(7, JIntellitype.MOD_ALT, (int) KeyEvent.VK_DOWN);
+
+		jintel.registerHotKey(8, JIntellitype.MOD_ALT, (int) 'L');
+
 		jintel.addHotKeyListener(new HotkeyListener() {
 
 			@Override
@@ -436,18 +397,20 @@ public class GUI {
 				case 7:
 					sliderOverlayY.setValue(sliderOverlayY.getValue() + 10);
 					break;
+				case 8:
+					checkBoxCopyToClipboard
+							.setSelected(!checkBoxCopyToClipboard.isSelected());
+					overlay.toggleCopyToClipboard();
+					break;
 				}
 
 			}
 		});
 	}
 
-	private class checkGuiOptions extends TimerTask {
-		public void run() {
-			if (guiOptions.isTrack() != checkboxTrack.isSelected()) {
-				checkboxTrack.setSelected(guiOptions.isTrack());
-			}
-
-		}
-	}
+	// private class checkGuiOptions extends TimerTask {
+	// public void run() {
+	//
+	// }
+	// }
 }

@@ -29,11 +29,13 @@ public class Resources {
 	public static ImageIcon IMAGE_CLASS_ELEMENTALIST = null;
 	public static ImageIcon IMAGE_CLASS_ENGINEER = null;
 	public static ImageIcon IMAGE_CLASS_GUARDIAN = null;
-	public static ImageIcon IMAGE_CLASS_MESMER = null;	
+	public static ImageIcon IMAGE_CLASS_MESMER = null;
 	public static ImageIcon IMAGE_CLASS_NECROMANCER = null;
-	public static ImageIcon IMAGE_CLASS_RANGER= null;
-	public static ImageIcon IMAGE_CLASS_THIEF= null;
+	public static ImageIcon IMAGE_CLASS_RANGER = null;
+	public static ImageIcon IMAGE_CLASS_THIEF = null;
 	public static ImageIcon IMAGE_CLASS_WARRIOR = null;
+
+	public static ImageIcon IMAGE_COMMANDER = null;
 
 	public static boolean load() {
 		try {
@@ -116,6 +118,10 @@ public class Resources {
 			IMAGE_CLASS_WARRIOR = new ImageIcon(
 					Resources.class
 							.getResource("/com/punk/resources/images/classes/class_warrior.png"));
+
+			IMAGE_COMMANDER = new ImageIcon(
+					Resources.class
+							.getResource("/com/punk/resources/images/classes/commander.png"));
 
 			return true;
 		} catch (Exception ignore) {
