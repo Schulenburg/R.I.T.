@@ -345,6 +345,7 @@ public class GUI {
 	}
 
 	private void setHotkeys() {
+
 		JIntellitype jintel = JIntellitype.getInstance();
 		jintel.registerHotKey(1, JIntellitype.MOD_ALT, (int) 'M');
 		jintel.registerHotKey(2, JIntellitype.MOD_ALT, (int) 'N');
@@ -356,6 +357,8 @@ public class GUI {
 		jintel.registerHotKey(7, JIntellitype.MOD_ALT, (int) KeyEvent.VK_DOWN);
 
 		jintel.registerHotKey(8, JIntellitype.MOD_ALT, (int) 'L');
+
+		jintel.registerHotKey(9, JIntellitype.MOD_ALT, (int) 'C');
 
 		jintel.addHotKeyListener(new HotkeyListener() {
 
@@ -402,8 +405,10 @@ public class GUI {
 							.setSelected(!checkBoxCopyToClipboard.isSelected());
 					overlay.toggleCopyToClipboard();
 					break;
+				case 9:
+					overlay.setWaypointTime(180);
+					break;
 				}
-
 			}
 		});
 	}

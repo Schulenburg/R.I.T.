@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -29,7 +31,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SpringLayout;
 
-import com.melloware.jintellitype.JIntellitype;
 import com.punk.model.Capturepoint;
 import com.punk.model.CapturepointsUtil;
 import com.punk.model.GuiOptions;
@@ -37,6 +38,9 @@ import com.punk.mumblelink.MumbleLink;
 import com.punk.resources.Resources;
 import com.punk.start.Start;
 import com.punk.start.Start.Border;
+import com.sun.jna.Native;
+import com.sun.jna.platform.win32.User32;
+import com.sun.jna.win32.W32APIOptions;
 
 /**
  * @author Sander Schulenburg aka "Much"(schulenburgsander@gmail.com)
@@ -73,6 +77,11 @@ public class Overlay extends Thread {
 	private Timer timer = null;
 
 	private JProgressBar nextUpdateBar = new JProgressBar(0, 100);
+
+	private User32 user32;
+
+	private int waypointTime = 0;
+	private JPanel waypointTimerPanel = null;
 
 	public Overlay(CapturepointsUtil capUtil, Border border, Overlay.Type type,
 			Overlay.Size size) {
@@ -118,8 +127,8 @@ public class Overlay extends Thread {
 		timer = new Timer();
 		timer.schedule(new updateTimers(), 0, 1000);
 
-		JIntellitype jintel = JIntellitype.getInstance();
-		jintel.registerHotKey(1, JIntellitype.MOD_ALT, (int) '1');
+		user32 = (User32) Native.loadLibrary("user32", User32.class,
+				W32APIOptions.DEFAULT_OPTIONS);
 	}
 
 	public void setLocation(int x, int y) {
@@ -157,6 +166,14 @@ public class Overlay extends Thread {
 			return 1;
 		}
 
+	}
+
+	public void setWaypointTime(int time) {
+		waypointTime = time;
+		if (waypointTime > 0) {
+			((JLabel) waypointTimerPanel.getComponent(0))
+					.setIcon(getWaypointIcon());
+		}
 	}
 
 	public void setBorder(Border border) {
@@ -223,6 +240,7 @@ public class Overlay extends Thread {
 		for (Capturepoint capturepoint : capturepoints) {
 			overlayPanel.remove(capturepoint.getOverlay());
 		}
+		overlayPanel.remove(waypointTimerPanel);
 	}
 
 	public void updateOverlayFrame() {
@@ -260,8 +278,55 @@ public class Overlay extends Thread {
 					SpringLayout.NORTH, overlayPanel);
 		}
 
+		waypointTimerPanel = new JPanel();
+		waypointTimerPanel.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
+		waypointTimerPanel.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.CENTER;
+		c.gridx = 0;
+		c.gridy = 0;
+
+		RichJLabel labelOverlayName = new RichJLabel(
+				getTimeAsString(waypointTime), 0);
+		labelOverlayName.setForeground(Color.CYAN);
+		labelOverlayName.setRightShadow(1, 1, Color.BLACK);
+		waypointTimerPanel.add(labelOverlayName, c);
+		labelOverlayName.setVisible(true);
+
+		JLabel labelOverlayIcon = new JLabel(getWaypointIcon());
+		waypointTimerPanel.add(labelOverlayIcon, c);
+		waypointTimerPanel.add(labelOverlayName);
+		overlayPanel.add(waypointTimerPanel);
+
+		overlayPanelSpringLayout.putConstraint(SpringLayout.HORIZONTAL_CENTER,
+				waypointTimerPanel, (int) ((double) 50 * sizeMultiplier),
+				SpringLayout.WEST, overlayPanel);
+		overlayPanelSpringLayout.putConstraint(SpringLayout.NORTH,
+				waypointTimerPanel, (int) ((double) 5 * sizeMultiplier),
+				SpringLayout.NORTH, overlayPanel);
+
 		applyPosition();
-		overlayFrame.repaint();
+		overlayPanel.repaint();
+	}
+
+	private ImageIcon getWaypointIcon() {
+		if (waypointTime > 0) {
+			ImageIcon icon = Resources.IMAGE_WAYPOINT_CONTESTED;
+			return new ImageIcon(
+					icon.getImage().getScaledInstance(
+							(int) (Resources.IMAGE_WAYPOINT_CONTESTED
+									.getIconWidth() * getSizeMultiplier()),
+							(int) (Resources.IMAGE_WAYPOINT_CONTESTED
+									.getIconHeight() * getSizeMultiplier()),
+							Image.SCALE_SMOOTH));
+		}
+		ImageIcon icon = Resources.IMAGE_WAYPOINT;
+		return new ImageIcon(
+				icon.getImage()
+						.getScaledInstance(
+								(int) (Resources.IMAGE_WAYPOINT.getIconWidth() * getSizeMultiplier()),
+								(int) (Resources.IMAGE_WAYPOINT.getIconHeight() * getSizeMultiplier()),
+								Image.SCALE_SMOOTH));
 	}
 
 	public void setSize(Size size) {
@@ -314,9 +379,18 @@ public class Overlay extends Thread {
 				cap.tickRit(getSizeMultiplier());
 			}
 
+			if (waypointTime > 0) {
+				waypointTime--;
+			} else {
+				((JLabel) waypointTimerPanel.getComponent(0))
+						.setIcon(getWaypointIcon());
+			}
+
+			((JLabel) waypointTimerPanel.getComponent(1))
+					.setText(getTimeAsString(waypointTime));
+
 			updateCapturePoints();
 			updatePlayerLocation();
-
 		}
 	}
 
@@ -336,8 +410,19 @@ public class Overlay extends Thread {
 
 	private void updatePlayerLocation() {
 		double playerX = (mumbleLink.getfAvatarPosition()[0] * 39.3700787);
-
 		double playerZ = (mumbleLink.getfAvatarPosition()[2] * 39.3700787);
+
+		double distance = Math.sqrt((playerX - 0) * (playerX - 0)
+				+ (playerZ - 0) * (playerZ - 0));
+		double angle = (float) Math.toDegrees(Math.atan2(0 - playerX,
+				0 - playerZ));
+
+		if (angle < 0) {
+			angle += 360;
+		}
+
+		// System.out.println(angle + " - " + distance + " feet / " + distance
+		// / 39.3700787 + " meters");
 
 		String data = mumbleLink.getCharName() + "," + playerX + "," + playerZ
 				+ "," + mumbleLink.getMapId() + ","
@@ -356,10 +441,18 @@ public class Overlay extends Thread {
 			socket = null;
 		}
 
+		if (user32 != null && user32.FindWindow(null, "Guild Wars 2") == null) {
+			data = mumbleLink.getCharName() + "," + playerX + "," + playerZ
+					+ "," + -1 + "," + mumbleLink.getProfession() + ","
+					+ guiOptions.getNickname() + "," + guiOptions.getChannel()
+					+ "-" + mumbleLink.getWorldId() + "-"
+					+ mumbleLink.getTeamColor();
+		}
+
 		if (socket == null || socket.isClosed()) {
 			handleLocalLocation(playerX, playerZ);
 		} else {
-			handleNetworkLocation(socket, data);
+			handleNetworkLocation(socket, data, angle);
 		}
 	}
 
@@ -394,9 +487,10 @@ public class Overlay extends Thread {
 					labelPlayer, locationZ, SpringLayout.NORTH, overlayPanel);
 		}
 		overlayPanel.repaint();
+		overlayFrame.repaint();
 	}
 
-	private void handleNetworkLocation(Socket socket, String data) {
+	private void handleNetworkLocation(Socket socket, String data, double angle) {
 		ObjectInputStream in = null;
 		PrintWriter out = null;
 
@@ -411,11 +505,16 @@ public class Overlay extends Thread {
 				@SuppressWarnings("unchecked")
 				HashMap<String, JLabel> playersServer = (HashMap<String, JLabel>) in
 						.readObject();
+				ArrayList<String> deleteList = new ArrayList<String>();
 				for (String key : players.keySet()) {
 					if (!playersServer.containsKey(key)) {
 						overlayPanel.remove(players.get(key));
-						players.remove(key);
+						deleteList.add(key);
 					}
+				}
+
+				for (String key : deleteList) {
+					players.remove(key);
 				}
 
 				for (String key : playersServer.keySet()) {
@@ -471,6 +570,21 @@ public class Overlay extends Thread {
 
 					ImageIcon icon = getProfIcon(Integer.parseInt(players
 							.get(key).getToolTipText().split(",")[3]));
+					// int w = icon.getIconWidth();
+					// int h = icon.getIconHeight();
+					// int type = BufferedImage.TYPE_INT_ARGB;
+					// BufferedImage image = new BufferedImage(h, w, type);
+					// Graphics2D g2 = image.createGraphics();
+					// double x1 = (h - w) / 2.0;
+					// double y1 = (w - h) / 2.0;
+					// AffineTransform at =
+					// AffineTransform.getTranslateInstance(
+					// x1, y1);
+					// at.rotate(Math.toRadians(angle), w / 2.0, h / 2.0);
+					// g2.drawImage(icon.getImage(), at, players.get(key));
+					// g2.dispose();
+					// icon = new ImageIcon(image);
+
 					players.get(key)
 							.setIcon(
 									new ImageIcon(
@@ -582,6 +696,18 @@ public class Overlay extends Thread {
 		clearOverlayFrame();
 		guiOptions.setBackgroundAlpha(backgroundTransparency);
 		updateOverlayFrame();
+	}
+
+	private String getTimeAsString(int time) {
+		if (time == 0) {
+			return "";
+		}
+		int seconds = time % 60;
+		int minutes = time / 60;
+		if (seconds < 10) {
+			return minutes + ":0" + seconds;
+		}
+		return minutes + ":" + seconds;
 	}
 
 	public void run() {

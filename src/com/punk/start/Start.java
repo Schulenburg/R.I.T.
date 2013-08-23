@@ -26,7 +26,7 @@ public class Start {
 
 	public final static String ip = "192.168.2.200";
 
-	public static final int API_REFRESH_DELAY = 15000;
+	public static final int API_REFRESH_DELAY = 1000;
 	public static int nextAPICall = API_REFRESH_DELAY / 1000;
 
 	private static final String SERVERNAME = "far shiverpeaks";

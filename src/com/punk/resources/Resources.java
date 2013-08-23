@@ -37,6 +37,9 @@ public class Resources {
 
 	public static ImageIcon IMAGE_COMMANDER = null;
 
+	public static ImageIcon IMAGE_WAYPOINT = null;
+	public static ImageIcon IMAGE_WAYPOINT_CONTESTED = null;
+
 	public static boolean load() {
 		try {
 			IMAGE_CAMP_RED = new ImageIcon(
@@ -122,6 +125,13 @@ public class Resources {
 			IMAGE_COMMANDER = new ImageIcon(
 					Resources.class
 							.getResource("/com/punk/resources/images/classes/commander.png"));
+
+			IMAGE_WAYPOINT = new ImageIcon(
+					Resources.class
+							.getResource("/com/punk/resources/images/map/waypoint.png"));
+			IMAGE_WAYPOINT_CONTESTED = new ImageIcon(
+					Resources.class
+							.getResource("/com/punk/resources/images/map/waypoint_contested.png"));
 
 			return true;
 		} catch (Exception ignore) {

@@ -96,12 +96,7 @@ public class MumbleLink {
 
 				}
 			}
-			// System.out.println("fAvatarPosition "
-			// + Arrays.toString(fAvatarPosition));
-			// description = sharedMemory.getCharArray(1620, 2048);
-			// if (!WinBase.INVALID_HANDLE_VALUE.equals(sharedFile)) {
-			// Kernel32.INSTANCE.CloseHandle(sharedFile);
-			// }
+			description = sharedMemory.getCharArray(1620, 2048);
 			// print();
 		}
 	}
@@ -120,10 +115,9 @@ public class MumbleLink {
 		// System.out.println("fCameraTop " + Arrays.toString(fCameraTop));
 		// System.out.println("identity " + Arrays.toString(identity));
 		// System.out.println("context_len " + context_len);
-		// System.out.println("context " + Arrays.toString(context));
-
-		System.out
-				.println("description " + Arrays.toString(description) + "\n");
+		System.out.println("context " + Arrays.toString(context));
+		// System.out
+		// .println("description " + Arrays.toString(description) + "\n");
 	}
 
 	public char[] getName() {
