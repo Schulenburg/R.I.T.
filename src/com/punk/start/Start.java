@@ -40,6 +40,10 @@ public class Start {
 		EB, RED, GREEN, BLUE;
 	}
 
+	public enum TrackMode {
+		Camera, Avatar, Map;
+	}
+
 	/**
 	 * @author Sander Schulenburg aka "Much"(schulenburgsander@gmail.com)
 	 * @param args

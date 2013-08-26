@@ -21,6 +21,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -74,7 +75,8 @@ public class Overlay extends Thread {
 
 	private GuiOptions guiOptions = GuiOptions.getInstance();
 
-	private Timer timer = null;
+	private Timer timerGUI = null;
+	private Timer timerSECOND = null;
 
 	private JProgressBar nextUpdateBar = new JProgressBar(0, 100);
 
@@ -82,6 +84,11 @@ public class Overlay extends Thread {
 
 	private int waypointTime = 0;
 	private JPanel waypointTimerPanel = null;
+
+	private NavigationOverlay navOverlay = null;
+
+	private HashMap<String, double[]> playersInMap = new HashMap<String, double[]>();
+	private String targetPlayer = "";
 
 	public Overlay(CapturepointsUtil capUtil, Border border, Overlay.Type type,
 			Overlay.Size size) {
@@ -124,11 +131,24 @@ public class Overlay extends Thread {
 
 		updateOverlayFrame();
 
-		timer = new Timer();
-		timer.schedule(new updateTimers(), 0, 1000);
+		timerGUI = new Timer();
+		timerGUI.schedule(new updateGUI(), 0, 1000);
+
+		timerSECOND = new Timer();
+		timerSECOND.schedule(new updateTimers(), 0, 1000);
 
 		user32 = (User32) Native.loadLibrary("user32", User32.class,
 				W32APIOptions.DEFAULT_OPTIONS);
+
+		navOverlay = new NavigationOverlay();
+	}
+
+	public void setTargetPlayer(String targetPlayer) {
+		this.targetPlayer = targetPlayer;
+	}
+
+	public Set<String> getPlayersInMap() {
+		return playersInMap.keySet();
 	}
 
 	public void setLocation(int x, int y) {
@@ -165,7 +185,6 @@ public class Overlay extends Thread {
 		default:
 			return 1;
 		}
-
 	}
 
 	public void setWaypointTime(int time) {
@@ -194,6 +213,7 @@ public class Overlay extends Thread {
 			nextUpdateBar.setForeground(Capturepoint.GRAY);
 			break;
 		}
+		guiOptions.setBorder(border);
 
 		updateOverlayFrame();
 	}
@@ -235,12 +255,14 @@ public class Overlay extends Thread {
 	}
 
 	public void clearOverlayFrame() {
-		ArrayList<Capturepoint> capturepoints = capUtil
-				.getCapturepoints(this.border);
-		for (Capturepoint capturepoint : capturepoints) {
-			overlayPanel.remove(capturepoint.getOverlay());
-		}
-		overlayPanel.remove(waypointTimerPanel);
+		// TODO nullpointer (causes old icons to be on overlay)a
+		// ArrayList<Capturepoint> capturepoints = capUtil
+		// .getCapturepoints(this.border);
+		// for (Capturepoint capturepoint : capturepoints) {
+		// overlayPanel.remove(capturepoint.getOverlay());
+		// }
+		// overlayPanel.remove(waypointTimerPanel);
+		overlayPanel.removeAll();
 	}
 
 	public void updateOverlayFrame() {
@@ -386,10 +408,42 @@ public class Overlay extends Thread {
 						.setIcon(getWaypointIcon());
 			}
 
-			((JLabel) waypointTimerPanel.getComponent(1))
-					.setText(getTimeAsString(waypointTime));
+			if (waypointTimerPanel.getComponentCount() >= 1) {
+				((JLabel) waypointTimerPanel.getComponent(1))
+						.setText(getTimeAsString(waypointTime));
+			}
 
 			updateCapturePoints();
+
+			if (guiOptions.isAutoSwapBorder()) {
+				switch (mumbleLink.getMapId()) {
+				case 38:
+					if (border != Border.EB) {
+						setBorder(Border.EB);
+					}
+					break;
+				case 94:
+					if (border != Border.RED) {
+						setBorder(Border.RED);
+					}
+					break;
+				case 96:
+					if (border != Border.BLUE) {
+						setBorder(Border.BLUE);
+					}
+					break;
+				case 95:
+					if (border != Border.GREEN) {
+						setBorder(Border.GREEN);
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	private class updateGUI extends TimerTask {
+		public void run() {
 			updatePlayerLocation();
 		}
 	}
@@ -411,18 +465,6 @@ public class Overlay extends Thread {
 	private void updatePlayerLocation() {
 		double playerX = (mumbleLink.getfAvatarPosition()[0] * 39.3700787);
 		double playerZ = (mumbleLink.getfAvatarPosition()[2] * 39.3700787);
-
-		double distance = Math.sqrt((playerX - 0) * (playerX - 0)
-				+ (playerZ - 0) * (playerZ - 0));
-		double angle = (float) Math.toDegrees(Math.atan2(0 - playerX,
-				0 - playerZ));
-
-		if (angle < 0) {
-			angle += 360;
-		}
-
-		// System.out.println(angle + " - " + distance + " feet / " + distance
-		// / 39.3700787 + " meters");
 
 		String data = mumbleLink.getCharName() + "," + playerX + "," + playerZ
 				+ "," + mumbleLink.getMapId() + ","
@@ -452,11 +494,12 @@ public class Overlay extends Thread {
 		if (socket == null || socket.isClosed()) {
 			handleLocalLocation(playerX, playerZ);
 		} else {
-			handleNetworkLocation(socket, data, angle);
+			handleNetworkLocation(socket, data);
 		}
 	}
 
 	private void handleLocalLocation(double playerX, double playerZ) {
+		guiOptions.setSharingLocation(false);
 		int locationX = (int) (((getWidth()) / getMapWidth()) * playerX)
 				+ (getWidth() / 2);
 		int locationZ = (int) (((getHeight()) / getMapHeight()) * (playerZ * -1))
@@ -490,7 +533,8 @@ public class Overlay extends Thread {
 		overlayFrame.repaint();
 	}
 
-	private void handleNetworkLocation(Socket socket, String data, double angle) {
+	private void handleNetworkLocation(Socket socket, String data) {
+		guiOptions.setSharingLocation(true);
 		ObjectInputStream in = null;
 		PrintWriter out = null;
 
@@ -515,6 +559,7 @@ public class Overlay extends Thread {
 
 				for (String key : deleteList) {
 					players.remove(key);
+					playersInMap.remove(key);
 				}
 
 				for (String key : playersServer.keySet()) {
@@ -543,6 +588,7 @@ public class Overlay extends Thread {
 		}
 
 		overlayPanel.remove(labelPlayer);
+
 		for (String key : players.keySet()) {
 			overlayPanel.remove(players.get(key));
 			if (Integer
@@ -557,6 +603,12 @@ public class Overlay extends Thread {
 					double pZ = Double.parseDouble(players.get(key)
 							.getToolTipText().split(",")[1]);
 
+					if (!key.equals(mumbleLink.getCharName())) {
+						System.err.println(key + " == "
+								+ mumbleLink.getCharName());
+						playersInMap.put(key, new double[] { pX, pZ });
+					}
+
 					int x = (int) (((getWidth()) / getMapWidth()) * pX)
 							+ (getWidth() / 2);
 					int z = (int) (((getHeight()) / getMapHeight()) * pZ * -1)
@@ -570,20 +622,6 @@ public class Overlay extends Thread {
 
 					ImageIcon icon = getProfIcon(Integer.parseInt(players
 							.get(key).getToolTipText().split(",")[3]));
-					// int w = icon.getIconWidth();
-					// int h = icon.getIconHeight();
-					// int type = BufferedImage.TYPE_INT_ARGB;
-					// BufferedImage image = new BufferedImage(h, w, type);
-					// Graphics2D g2 = image.createGraphics();
-					// double x1 = (h - w) / 2.0;
-					// double y1 = (w - h) / 2.0;
-					// AffineTransform at =
-					// AffineTransform.getTranslateInstance(
-					// x1, y1);
-					// at.rotate(Math.toRadians(angle), w / 2.0, h / 2.0);
-					// g2.drawImage(icon.getImage(), at, players.get(key));
-					// g2.dispose();
-					// icon = new ImageIcon(image);
 
 					players.get(key)
 							.setIcon(
@@ -607,8 +645,74 @@ public class Overlay extends Thread {
 				}
 			}
 		}
-
+		trackPlayer();
 		overlayPanel.repaint();
+	}
+
+	private void trackPlayer() {
+		double targetX = 0;
+		double targetZ = 0;
+
+		boolean playerFound = playersInMap.containsKey(targetPlayer);
+
+		if (playerFound) {
+			targetX = playersInMap.get(targetPlayer)[0];
+			targetZ = playersInMap.get(targetPlayer)[1];
+		}
+
+		double playerX = (mumbleLink.getfAvatarPosition()[0] * 39.3700787);
+		double playerZ = (mumbleLink.getfAvatarPosition()[2] * 39.3700787);
+
+		double distance = Math.sqrt((playerX - targetX) * (playerX - targetX)
+				+ (playerZ - targetZ) * (playerZ - targetZ));
+		double angle = (float) Math.toDegrees(Math.atan2(targetX - playerX,
+				targetZ - playerZ));
+
+		if (angle < 0) {
+			angle += 360;
+		}
+
+		if (navOverlay != null) {
+
+			// angle = minimap view
+			// afx = player direction
+			// cfx = camera direction
+
+			double afx = mumbleLink.getfAvatarFront()[0];
+			double afz = mumbleLink.getfAvatarFront()[2];
+
+			double aRot = (Math.atan2(afz, afx) * 180 / Math.PI) - 90;
+			if (aRot < 0.0) {
+				aRot = 360 + aRot;
+			}
+
+			double cfx = mumbleLink.getfCameraFront()[0];
+			double cfz = mumbleLink.getfCameraFront()[2];
+
+			double cRot = (Math.atan2(cfz, cfx) * 180 / Math.PI) - 90;
+			if (cRot < 0.0) {
+				cRot = 360 + cRot;
+			}
+
+			if (playerFound) {
+				navOverlay.setDistance(distance);
+			} else {
+				navOverlay.setDistance(-1);
+			}
+
+			switch (guiOptions.getTrackMode()) {
+			case Map:
+				navOverlay.setAngle(angle);
+				break;
+			case Camera:
+				navOverlay.setAngle(angle - (360 - cRot));
+				break;
+			case Avatar:
+				navOverlay.setAngle(angle - (360 - aRot));
+				break;
+			}
+
+		}
 	}
 
 	private void updateCapturePoints() {

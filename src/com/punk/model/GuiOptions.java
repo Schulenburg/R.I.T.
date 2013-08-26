@@ -1,5 +1,8 @@
 package com.punk.model;
 
+import com.punk.start.Start.Border;
+import com.punk.start.Start.TrackMode;
+
 public class GuiOptions {
 
 	private static GuiOptions instance = null;
@@ -8,10 +11,18 @@ public class GuiOptions {
 	private int yLocation;
 	private int backgroundAlpha = 100;
 
+	private Border border = Border.EB;
+
 	private boolean change = false;
 
 	private String channel = "Public";
 	private String nickname = "";
+
+	private boolean sharingLocation = false;
+
+	private TrackMode trackMode = TrackMode.Camera;
+
+	private boolean autoBorderSwap = true;
 
 	protected GuiOptions() {
 
@@ -51,6 +62,14 @@ public class GuiOptions {
 		setChange(true);
 	}
 
+	public Border getBorder() {
+		return border;
+	}
+
+	public void setBorder(Border border) {
+		this.border = border;
+	}
+
 	public boolean getChange() {
 		return change;
 	}
@@ -73,6 +92,30 @@ public class GuiOptions {
 
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
+	}
+
+	public boolean isSharingLocation() {
+		return sharingLocation;
+	}
+
+	public void setSharingLocation(boolean sharingLocation) {
+		this.sharingLocation = sharingLocation;
+	}
+
+	public TrackMode getTrackMode() {
+		return trackMode;
+	}
+
+	public void setTrackMode(TrackMode trackMode) {
+		this.trackMode = trackMode;
+	}
+
+	public boolean isAutoSwapBorder() {
+		return autoBorderSwap;
+	}
+
+	public void setAutoSwapBorder(boolean autoBorderSwap) {
+		this.autoBorderSwap = autoBorderSwap;
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.punk.view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -11,6 +12,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -28,6 +31,7 @@ import com.melloware.jintellitype.JIntellitype;
 import com.punk.model.CapturepointsUtil;
 import com.punk.model.GuiOptions;
 import com.punk.start.Start.Border;
+import com.punk.start.Start.TrackMode;
 import com.punk.view.Overlay.Size;
 
 /**
@@ -49,6 +53,8 @@ public class GUI {
 			Border.BLUE };
 	private Overlay.Size[] comboOverlaySizeArray = { Overlay.Size.LARGE,
 			Overlay.Size.MEDIUM, Overlay.Size.SMALL };
+	private TrackMode[] trackModeArray = { TrackMode.Camera, TrackMode.Avatar,
+			TrackMode.Map };
 
 	private JButton btnOverlayWvw;
 	private JComboBox<Border> comboBoxBorder;
@@ -58,6 +64,7 @@ public class GUI {
 	private JCheckBox checkBoxShowBackground;
 	private JCheckBox checkBoxShowNames;
 	private JCheckBox checkBoxCopyToClipboard;
+	private JCheckBox checkBoxAutoBorder;
 
 	private JLabel labelBackgroundAlpha;
 	private JSlider sliderBackgroundAlpha;
@@ -78,9 +85,14 @@ public class GUI {
 	private JTextField txtNickname;
 	private JLabel labelNicknameLimit;
 
-	private JButton btnUpdateTrackSettings;
+	private JComboBox<String> comboBoxTrackPlayer;
+	private JButton btnRefreshTrackPlayers;
+	private JComboBox<TrackMode> comboBoxTrackMode;
 
-	// private Timer checkGuiOptionsTimer;
+	private JButton btnUpdateTrackSettings;
+	private JLabel labelSharing;
+
+	private Timer checkGuiOptionsTimer;
 
 	public GUI(CapturepointsUtil capUtil) {
 		overlay = new Overlay(capUtil, Border.EB, Overlay.Type.Icons,
@@ -95,15 +107,16 @@ public class GUI {
 		frame = new JFrame("R.I.T.");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLayout(new BorderLayout());
-		frame.setSize(650, 250);
+		frame.setSize(650, 300);
 		frame.add(components, BorderLayout.CENTER);
 		frame.add(new JLabel(credits), BorderLayout.SOUTH);
 		frame.setVisible(true);
 
 		setHotkeys();
 
-		// checkGuiOptionsTimer = new Timer();
-		// checkGuiOptionsTimer.schedule(new checkGuiOptions(), 0, 1000);
+		checkGuiOptionsTimer = new Timer();
+		checkGuiOptionsTimer.schedule(new checkGuiOptions(), 0, 5000);
+		btnRefreshTrackPlayers.doClick();
 	}
 
 	private void addMenu(JPanel components) {
@@ -119,6 +132,7 @@ public class GUI {
 		checkBoxCopyToClipboard = new JCheckBox("Copy to clipboard", false);
 		checkBoxShowNames = new JCheckBox("Show Names", false);
 		checkBoxShowBackground = new JCheckBox("Show Map", true);
+		checkBoxAutoBorder = new JCheckBox("Auto border swap", true);
 
 		labelBackgroundAlpha = new JLabel("Map Alpha:");
 		sliderBackgroundAlpha = new JSlider(0, 100, 100);
@@ -143,7 +157,11 @@ public class GUI {
 		txtNickname = new JTextField("");
 		labelNicknameLimit = new JLabel("Optional (5 char max)");
 
-		btnUpdateTrackSettings = new JButton("Update track settings");
+		labelSharing = new JLabel();
+		btnUpdateTrackSettings = new JButton("Update settings");
+		btnRefreshTrackPlayers = new JButton("Refresh list");
+		comboBoxTrackPlayer = new JComboBox<String>();
+		comboBoxTrackMode = new JComboBox<TrackMode>(trackModeArray);
 
 		components.add(btnOverlayWvw);
 		components.add(comboBoxBorder);
@@ -153,7 +171,7 @@ public class GUI {
 		components.add(checkBoxShowNames);
 		components.add(checkBoxShowBackground);
 		components.add(checkBoxCopyToClipboard);
-		components.add(new JLabel());
+		components.add(checkBoxAutoBorder);
 
 		components.add(labelBackgroundAlpha);
 		components.add(new JLabel("0 - 100"));
@@ -185,9 +203,19 @@ public class GUI {
 		components.add(labelNicknameLimit);
 		components.add(new JLabel());
 
+		components.add(new JLabel("Track"));
+		components.add(comboBoxTrackPlayer);
+		components.add(btnRefreshTrackPlayers);
+		components.add(new JLabel());
+
+		components.add(new JLabel("Track mode"));
+		components.add(comboBoxTrackMode);
+		components.add(new JLabel());
+		components.add(new JLabel());
+
+		components.add(new JLabel());
 		components.add(btnUpdateTrackSettings);
-		components.add(new JLabel());
-		components.add(new JLabel());
+		components.add(labelSharing);
 		components.add(new JLabel());
 
 		btnOverlayWvw.addActionListener(new ActionListener() {
@@ -206,7 +234,12 @@ public class GUI {
 		comboBoxBorder.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (overlay != null) {
-					overlay.setBorder((Border) comboBoxBorder.getSelectedItem());
+					if (comboBoxBorder.getSelectedItem() != guiOptions
+							.getBorder()) {
+						overlay.setBorder((Border) comboBoxBorder
+								.getSelectedItem());
+						btnRefreshTrackPlayers.doClick();
+					}
 				}
 			}
 		});
@@ -285,6 +318,14 @@ public class GUI {
 			}
 		});
 
+		checkBoxAutoBorder.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				guiOptions.setAutoSwapBorder(checkBoxAutoBorder.isSelected());
+			}
+		});
+
 		sliderBackgroundAlpha.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -335,10 +376,51 @@ public class GUI {
 			}
 		});
 
+		comboBoxTrackMode.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				guiOptions.setTrackMode((TrackMode) comboBoxTrackMode
+						.getSelectedItem());
+			}
+		});
+
 		btnUpdateTrackSettings.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				guiOptions.setNickname(txtNickname.getText());
 				guiOptions.setChannel(txtChannel.getText());
+				overlay.setTargetPlayer((String) comboBoxTrackPlayer
+						.getSelectedItem());
+			}
+		});
+
+		btnRefreshTrackPlayers.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String currentTrack = (String) comboBoxTrackPlayer
+						.getSelectedItem();
+				comboBoxTrackPlayer.removeAllItems();
+				comboBoxTrackPlayer.addItem("<Don't track>");
+				for (String s : overlay.getPlayersInMap()) {
+					comboBoxTrackPlayer.addItem(s);
+				}
+
+				if (currentTrack != null && !currentTrack.isEmpty()) {
+					for (int i = 0; i < comboBoxTrackPlayer.getItemCount(); i++) {
+						if (currentTrack == comboBoxTrackPlayer.getItemAt(i)) {
+							comboBoxTrackPlayer.setSelectedIndex(i);
+							i = comboBoxTrackPlayer.getItemCount() + 1;
+						}
+					}
+				}
+			}
+		});
+
+		comboBoxTrackPlayer.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				overlay.setTargetPlayer((String) comboBoxTrackPlayer
+						.getSelectedItem());
 			}
 		});
 
@@ -413,9 +495,18 @@ public class GUI {
 		});
 	}
 
-	// private class checkGuiOptions extends TimerTask {
-	// public void run() {
-	//
-	// }
-	// }
+	private class checkGuiOptions extends TimerTask {
+		public void run() {
+			if (guiOptions.getBorder() != comboBoxBorder.getSelectedItem()) {
+				comboBoxBorder.setSelectedItem(guiOptions.getBorder());
+			}
+			if (guiOptions.isSharingLocation()) {
+				labelSharing.setText("Sharing location");
+				labelSharing.setForeground(Color.GREEN);
+			} else {
+				labelSharing.setText("Only own location");
+				labelSharing.setForeground(Color.RED);
+			}
+		}
+	}
 }
