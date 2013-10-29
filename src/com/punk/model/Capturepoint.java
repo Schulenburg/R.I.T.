@@ -33,7 +33,7 @@ public class Capturepoint implements Serializable {
 	private final double FONTMULTIPLIER = 1.3;
 
 	public enum Type {
-		Castle, Keep, Tower, Camp
+		Castle, Keep, Tower, Camp, Bloodlust
 	}
 
 	private int id;
@@ -95,7 +95,7 @@ public class Capturepoint implements Serializable {
 	}
 
 	public void tickRit(double scale) {
-		if (panelOverlay == null)
+		if (panelOverlay == null || isBloodlust())
 			return;
 
 		if (riTime > 0) {
@@ -282,5 +282,9 @@ public class Capturepoint implements Serializable {
 
 	public String getChatcode() {
 		return chatcode;
+	}
+
+	public boolean isBloodlust() {
+		return !(type == Type.Camp || type == Type.Tower || type == Type.Keep || type == Type.Castle);
 	}
 }

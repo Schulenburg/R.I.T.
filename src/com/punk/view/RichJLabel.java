@@ -1,5 +1,6 @@
 package com.punk.view;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
@@ -16,6 +17,7 @@ public class RichJLabel extends JLabel {
 	private int tracking;
 	private int left_x, left_y, right_x, right_y;
 	private Color left_color, right_color;
+	private int alpha = 100;
 
 	public RichJLabel(String text, int tracking) {
 		super(text, JLabel.CENTER);
@@ -62,6 +64,10 @@ public class RichJLabel extends JLabel {
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
 
+		AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+				((float) alpha / 100));
+		g2.setComposite(ac);
+
 		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
 				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		char[] chars = getText().toCharArray();
@@ -72,7 +78,7 @@ public class RichJLabel extends JLabel {
 		int x = 0;
 
 		if (this.getIcon() != null) {
-			this.getIcon().paintIcon(this, g, x, 0);
+			this.getIcon().paintIcon(this, g2, x, 0);
 			h += this.getIcon().getIconHeight() + this.getIconTextGap();
 		}
 
@@ -80,19 +86,23 @@ public class RichJLabel extends JLabel {
 			char ch = chars[i];
 			int w = fm.charWidth(ch) + tracking;
 
-			g.setColor(left_color);
-			g.drawString("" + chars[i], x - left_x, h - left_y);
+			g2.setColor(left_color);
+			g2.drawString("" + chars[i], x - left_x, h - left_y);
 
-			g.setColor(right_color);
-			g.drawString("" + chars[i], x + right_x, h + right_y);
+			g2.setColor(right_color);
+			g2.drawString("" + chars[i], x + right_x, h + right_y);
 
-			g.setColor(getForeground());
-			g.drawString("" + chars[i], x, h);
+			g2.setColor(getForeground());
+			g2.drawString("" + chars[i], x, h);
 
 			x += w;
 		}
 
 		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
 				RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT);
+	}
+
+	public void setAlpha(int alpha) {
+		this.alpha = alpha;
 	}
 }

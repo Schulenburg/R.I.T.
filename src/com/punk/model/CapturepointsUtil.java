@@ -2,17 +2,10 @@ package com.punk.model;
 
 import java.awt.Color;
 import java.awt.Point;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.punk.start.Start;
 import com.punk.start.Start.Border;
 
 /**
@@ -41,69 +34,70 @@ public class CapturepointsUtil {
 		capturePoints.put(Border.GREEN, capturePointsGreen);
 		capturePoints.put(Border.BLUE, capturePointsBlue);
 
-		Socket socket = null;
-
-		try {
-			socket = new Socket(Start.ip, 11111);
-
-		} catch (UnknownHostException uhe) {
-			// Server Host unreachable
-			socket = null;
-		} catch (IOException ioe) {
-			// Cannot connect to port on given server host
-			socket = null;
-		}
-
-		if (socket != null) {
-			ObjectInputStream in = null;
-			PrintWriter out = null;
-
-			try {
-				in = new ObjectInputStream(socket.getInputStream());
-				out = new PrintWriter(new OutputStreamWriter(
-						socket.getOutputStream()));
-				out.println("data");
-				out.flush();
-
-				try {
-					@SuppressWarnings("unchecked")
-					Map<Integer, Map<Integer, Integer>> capturepoints = (Map<Integer, Map<Integer, Integer>>) in
-							.readObject();
-
-					for (int i : capturepoints.get(1).keySet()) {
-						capturePointsEB.get(i).setRiTime(
-								capturepoints.get(1).get(i));
-					}
-					for (int i : capturepoints.get(2).keySet()) {
-						capturePointsRed.get(i).setRiTime(
-								capturepoints.get(2).get(i));
-					}
-					for (int i : capturepoints.get(3).keySet()) {
-						capturePointsBlue.get(i).setRiTime(
-								capturepoints.get(3).get(i));
-					}
-					for (int i : capturepoints.get(4).keySet()) {
-						capturePointsGreen.get(i).setRiTime(
-								capturepoints.get(4).get(i));
-					}
-
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-				out.println("Quit");
-				out.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					out.close();
-					in.close();
-					socket.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		// Socket socket = null;
+		//
+		// try {
+		// socket = new Socket(Start.ip, 11111);
+		//
+		// } catch (UnknownHostException uhe) {
+		// // Server Host unreachable
+		// socket = null;
+		// } catch (IOException ioe) {
+		// // Cannot connect to port on given server host
+		// socket = null;
+		// }
+		//
+		// if (socket != null) {
+		// ObjectInputStream in = null;
+		// PrintWriter out = null;
+		//
+		// try {
+		// in = new ObjectInputStream(socket.getInputStream());
+		// out = new PrintWriter(new OutputStreamWriter(
+		// socket.getOutputStream()));
+		// out.println("data");
+		// out.flush();
+		//
+		// try {
+		// @SuppressWarnings("unchecked")
+		// Map<Integer, Map<Integer, Integer>> capturepoints = (Map<Integer,
+		// Map<Integer, Integer>>) in
+		// .readObject();
+		//
+		// for (int i : capturepoints.get(1).keySet()) {
+		// capturePointsEB.get(i).setRiTime(
+		// capturepoints.get(1).get(i));
+		// }
+		// for (int i : capturepoints.get(2).keySet()) {
+		// capturePointsRed.get(i).setRiTime(
+		// capturepoints.get(2).get(i));
+		// }
+		// for (int i : capturepoints.get(3).keySet()) {
+		// capturePointsBlue.get(i).setRiTime(
+		// capturepoints.get(3).get(i));
+		// }
+		// for (int i : capturepoints.get(4).keySet()) {
+		// capturePointsGreen.get(i).setRiTime(
+		// capturepoints.get(4).get(i));
+		// }
+		//
+		// } catch (ClassNotFoundException e) {
+		// e.printStackTrace();
+		// }
+		// out.println("Quit");
+		// out.flush();
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// } finally {
+		// try {
+		// out.close();
+		// in.close();
+		// socket.close();
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// }
+		// }
 	}
 
 	public ArrayList<Capturepoint> getCapturepoints(Border border) {
@@ -133,12 +127,14 @@ public class CapturepointsUtil {
 
 	public void switchOwner(int id, Color server, Border border) {
 		Capturepoint point = capturePoints.get(border).get(id);
-		if (point.getServer() != server) {
-			if (!point.getInitialized()) {
-				point.setServer(server);
-				point.setInitialized(true);
-			} else {
-				point.flip(server);
+		if (point != null) {
+			if (point.getServer() != server) {
+				if (!point.getInitialized()) {
+					point.setServer(server);
+					point.setInitialized(true);
+				} else {
+					point.flip(server);
+				}
 			}
 		}
 	}
@@ -174,7 +170,7 @@ public class CapturepointsUtil {
 				Capturepoint.Type.Tower, new Point(166, 316), "[&BPEDAAA=]"));
 
 		capturePointsEB.put(2, new Capturepoint(2, "Valley", 25,
-				Capturepoint.Type.Keep, new Point(360, 394), "[&BPMDAAA=]"));
+				Capturepoint.Type.Keep, new Point(360, 394), "[&BOIDAAA=]"));
 		capturePointsEB.put(22, new Capturepoint(22, "Bravost Escarpment", 10,
 				Capturepoint.Type.Tower, new Point(310, 446), "[&BOYDAAA=]"));
 		capturePointsEB.put(8, new Capturepoint(8, "Umberglade Woods", 5,
@@ -189,7 +185,7 @@ public class CapturepointsUtil {
 				Capturepoint.Type.Tower, new Point(380, 286), "[&BOgDAAA=]"));
 
 		capturePointsEB.put(3, new Capturepoint(3, "Lowlands", 25,
-				Capturepoint.Type.Keep, new Point(360, 98), "[&BOIDAAA=]"));
+				Capturepoint.Type.Keep, new Point(360, 98), "[&BPMDAAA=]"));
 		capturePointsEB.put(13, new Capturepoint(13, "Jerrifer's Slough", 10,
 				Capturepoint.Type.Tower, new Point(410, 128), "[&BPYDAAA=]"));
 		capturePointsEB.put(4, new Capturepoint(4, "Golanta Clearing", 5,
@@ -233,6 +229,17 @@ public class CapturepointsUtil {
 				Capturepoint.Type.Camp, new Point(490, 426), "[&BBcFAAA=]"));
 		capturePointsRed.put(34, new Capturepoint(34, "Victors's Lodge", 5,
 				Capturepoint.Type.Camp, new Point(600, 242), "[&BBgFAAA=]"));
+
+		capturePointsRed.put(62, new Capturepoint(62, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
+		capturePointsRed.put(63, new Capturepoint(63, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
+		capturePointsRed.put(64, new Capturepoint(64, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
+		capturePointsRed.put(65, new Capturepoint(65, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
+		capturePointsRed.put(66, new Capturepoint(66, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
 	}
 
 	private void createBorderGreen() {
@@ -264,6 +271,17 @@ public class CapturepointsUtil {
 				Capturepoint.Type.Camp, new Point(484, 82), "[&BDgFAAA=]"));
 		capturePointsGreen.put(55, new Capturepoint(55, "Redwater Lowlands", 5,
 				Capturepoint.Type.Camp, new Point(490, 426), "[&BDoFAAA=]"));
+
+		capturePointsGreen.put(72, new Capturepoint(72, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
+		capturePointsGreen.put(73, new Capturepoint(73, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
+		capturePointsGreen.put(74, new Capturepoint(74, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
+		capturePointsGreen.put(75, new Capturepoint(75, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
+		capturePointsGreen.put(76, new Capturepoint(76, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
 	}
 
 	private void createBorderBlue() {
@@ -295,5 +313,16 @@ public class CapturepointsUtil {
 				5, Capturepoint.Type.Camp, new Point(490, 426), "[&BCYFAAA=]"));
 		capturePointsBlue.put(24, new Capturepoint(24, "Champion's demense", 5,
 				Capturepoint.Type.Camp, new Point(600, 242), "[&BCUFAAA=]"));
+
+		capturePointsBlue.put(67, new Capturepoint(67, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
+		capturePointsBlue.put(68, new Capturepoint(68, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
+		capturePointsBlue.put(69, new Capturepoint(69, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
+		capturePointsBlue.put(70, new Capturepoint(70, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
+		capturePointsBlue.put(71, new Capturepoint(71, "", 0,
+				Capturepoint.Type.Bloodlust, new Point(0, 0), ""));
 	}
 }

@@ -2,6 +2,7 @@ package com.punk.model;
 
 import com.punk.start.Start.Border;
 import com.punk.start.Start.TrackMode;
+import com.punk.start.Start.TrackUnit;
 
 public class GuiOptions {
 
@@ -21,8 +22,9 @@ public class GuiOptions {
 	private boolean sharingLocation = false;
 
 	private TrackMode trackMode = TrackMode.Camera;
+	private TrackUnit trackUnit = TrackUnit.Units;
 
-	private boolean autoBorderSwap = true;
+	private boolean autoBorderSwap = false;
 
 	protected GuiOptions() {
 
@@ -108,6 +110,14 @@ public class GuiOptions {
 
 	public void setTrackMode(TrackMode trackMode) {
 		this.trackMode = trackMode;
+	}
+
+	public TrackUnit getTrackUnit() {
+		return trackUnit;
+	}
+
+	public void setTrackUnit(TrackUnit trackUnit) {
+		this.trackUnit = trackUnit;
 	}
 
 	public boolean isAutoSwapBorder() {

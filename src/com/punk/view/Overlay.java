@@ -2,6 +2,7 @@ package com.punk.view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -132,7 +133,7 @@ public class Overlay extends Thread {
 		updateOverlayFrame();
 
 		timerGUI = new Timer();
-		timerGUI.schedule(new updateGUI(), 0, 1000);
+		timerGUI.schedule(new updateGUI(), 0, 200);
 
 		timerSECOND = new Timer();
 		timerSECOND.schedule(new updateTimers(), 0, 1000);
@@ -140,7 +141,7 @@ public class Overlay extends Thread {
 		user32 = (User32) Native.loadLibrary("user32", User32.class,
 				W32APIOptions.DEFAULT_OPTIONS);
 
-		navOverlay = new NavigationOverlay();
+		navOverlay = null;// new NavigationOverlay();
 	}
 
 	public void setTargetPlayer(String targetPlayer) {
@@ -237,17 +238,7 @@ public class Overlay extends Thread {
 	}
 
 	public int getBorderObjectCount() {
-		switch (border) {
-		case EB:
-			return 22;
-		case RED:
-			return 13;
-		case BLUE:
-			return 13;
-		case GREEN:
-			return 13;
-		}
-		return 0;
+		return capUtil.getCapturepoints(border).size();
 	}
 
 	public Size getSize() {
@@ -255,13 +246,6 @@ public class Overlay extends Thread {
 	}
 
 	public void clearOverlayFrame() {
-		// TODO nullpointer (causes old icons to be on overlay)a
-		// ArrayList<Capturepoint> capturepoints = capUtil
-		// .getCapturepoints(this.border);
-		// for (Capturepoint capturepoint : capturepoints) {
-		// overlayPanel.remove(capturepoint.getOverlay());
-		// }
-		// overlayPanel.remove(waypointTimerPanel);
 		overlayPanel.removeAll();
 	}
 
@@ -287,17 +271,24 @@ public class Overlay extends Thread {
 				.getCapturepoints(border);
 
 		for (Capturepoint capturepoint : capturepoints) {
-			capturepoint.createOverlay(showNames, getSizeMultiplier());
-			JPanel overlay = capturepoint.getOverlay();
-			overlayPanel.add(overlay);
+			if (!capturepoint.isBloodlust()) {
+				capturepoint.createOverlay(showNames, getSizeMultiplier());
+				JPanel overlay = capturepoint.getOverlay();
+				overlayPanel.add(overlay);
 
-			overlayPanelSpringLayout.putConstraint(
-					SpringLayout.HORIZONTAL_CENTER, overlay,
-					(int) ((double) capturepoint.getTop() * sizeMultiplier),
-					SpringLayout.WEST, overlayPanel);
-			overlayPanelSpringLayout.putConstraint(SpringLayout.NORTH, overlay,
-					(int) ((double) capturepoint.getLeft() * sizeMultiplier),
-					SpringLayout.NORTH, overlayPanel);
+				overlayPanelSpringLayout
+						.putConstraint(
+								SpringLayout.HORIZONTAL_CENTER,
+								overlay,
+								(int) ((double) capturepoint.getTop() * sizeMultiplier),
+								SpringLayout.WEST, overlayPanel);
+				overlayPanelSpringLayout
+						.putConstraint(
+								SpringLayout.NORTH,
+								overlay,
+								(int) ((double) capturepoint.getLeft() * sizeMultiplier),
+								SpringLayout.NORTH, overlayPanel);
+			}
 		}
 
 		waypointTimerPanel = new JPanel();
@@ -444,7 +435,7 @@ public class Overlay extends Thread {
 
 	private class updateGUI extends TimerTask {
 		public void run() {
-			updatePlayerLocation();
+			// updatePlayerLocation();
 		}
 	}
 
@@ -604,8 +595,6 @@ public class Overlay extends Thread {
 							.getToolTipText().split(",")[1]);
 
 					if (!key.equals(mumbleLink.getCharName())) {
-						System.err.println(key + " == "
-								+ mumbleLink.getCharName());
 						playersInMap.put(key, new double[] { pX, pZ });
 					}
 
@@ -653,7 +642,7 @@ public class Overlay extends Thread {
 		double targetX = 0;
 		double targetZ = 0;
 
-		boolean playerFound = playersInMap.containsKey(targetPlayer);
+		boolean playerFound = false; // playersInMap.containsKey(targetPlayer);
 
 		if (playerFound) {
 			targetX = playersInMap.get(targetPlayer)[0];
@@ -721,16 +710,18 @@ public class Overlay extends Thread {
 		String timersBlue = " | Blue: ";
 		String timersGreen = " | Green: ";
 		for (Capturepoint cap : capUtil.getCapturepoints(border)) {
-			if (cap.getRiTime() > 0 && copyToClipboard) {
-				if (cap.getServer() == Capturepoint.RED) {
-					timersRed += cap.getChatcode() + " = " + cap.getTimer()
-							+ " ";
-				} else if (cap.getServer() == Capturepoint.BLUE) {
-					timersBlue += cap.getChatcode() + " = " + cap.getTimer()
-							+ " ";
-				} else if (cap.getServer() == Capturepoint.GREEN) {
-					timersGreen += cap.getChatcode() + " = " + cap.getTimer()
-							+ " ";
+			if (!cap.isBloodlust()) {
+				if (cap.getRiTime() > 0 && copyToClipboard) {
+					if (cap.getServer() == Capturepoint.RED) {
+						timersRed += cap.getChatcode() + " = " + cap.getTimer()
+								+ " ";
+					} else if (cap.getServer() == Capturepoint.BLUE) {
+						timersBlue += cap.getChatcode() + " = "
+								+ cap.getTimer() + " ";
+					} else if (cap.getServer() == Capturepoint.GREEN) {
+						timersGreen += cap.getChatcode() + " = "
+								+ cap.getTimer() + " ";
+					}
 				}
 			}
 		}
@@ -799,6 +790,11 @@ public class Overlay extends Thread {
 	public void setBackgroundAlpha(int backgroundTransparency) {
 		clearOverlayFrame();
 		guiOptions.setBackgroundAlpha(backgroundTransparency);
+		for (Component component : overlayPanel.getComponents()) {
+			if (component instanceof RichJLabel) {
+				((RichJLabel) component).setAlpha(backgroundTransparency);
+			}
+		}
 		updateOverlayFrame();
 	}
 

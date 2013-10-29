@@ -14,6 +14,7 @@ import java.util.TimerTask;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
+import com.punk.model.GuiOptions;
 import com.punk.resources.Resources;
 
 public class NavigationOverlay {
@@ -27,7 +28,10 @@ public class NavigationOverlay {
 
 	private DecimalFormat df = new DecimalFormat("#.##");
 
+	private GuiOptions guiOptions = null;
+
 	public NavigationOverlay() {
+		guiOptions = GuiOptions.getInstance();
 		overlayFrame = new JFrame();
 		overlayFrame.setUndecorated(true);
 		overlayFrame.setSize(0, 0);
@@ -51,8 +55,7 @@ public class NavigationOverlay {
 		labelArrow = new RichJLabel("", 0);
 		overlayFrame.add(labelArrow);
 
-		labelDistance = new RichJLabel(df.format(distance / 39.3700787)
-				+ " Meters", 0);
+		labelDistance = new RichJLabel(getUnitConversionToString(distance), 0);
 		labelDistance.setForeground(Color.ORANGE);
 		labelDistance.setRightShadow(1, 1, Color.BLACK);
 
@@ -63,6 +66,17 @@ public class NavigationOverlay {
 
 		timer = new Timer();
 		timer.schedule(new updateLocation(), 0, 150);
+	}
+
+	private String getUnitConversionToString(double distance) {
+		switch (guiOptions.getTrackUnit()) {
+		case Units:
+			return df.format(distance * 12) + " Units";
+		case Meters:
+			return df.format(distance / 39.3700787) + " Meters";
+		default:
+			return df.format(distance) + " Feet";
+		}
 	}
 
 	private class updateLocation extends TimerTask {
@@ -85,7 +99,7 @@ public class NavigationOverlay {
 			g2.dispose();
 			icon = new ImageIcon(image);
 			labelArrow.setIcon(icon);
-			labelDistance.setText(df.format(distance / 39.3700787) + " Meters");
+			labelDistance.setText(getUnitConversionToString(distance));
 			overlayFrame.repaint();
 			overlayFrame.setFocusableWindowState(false);
 			overlayFrame.setVisible(true);

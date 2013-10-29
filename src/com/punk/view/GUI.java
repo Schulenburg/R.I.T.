@@ -32,6 +32,7 @@ import com.punk.model.CapturepointsUtil;
 import com.punk.model.GuiOptions;
 import com.punk.start.Start.Border;
 import com.punk.start.Start.TrackMode;
+import com.punk.start.Start.TrackUnit;
 import com.punk.view.Overlay.Size;
 
 /**
@@ -55,6 +56,8 @@ public class GUI {
 			Overlay.Size.MEDIUM, Overlay.Size.SMALL };
 	private TrackMode[] trackModeArray = { TrackMode.Camera, TrackMode.Avatar,
 			TrackMode.Map };
+	private TrackUnit[] trackUnitArray = { TrackUnit.Units, TrackUnit.Meters,
+			TrackUnit.Feet };
 
 	private JButton btnOverlayWvw;
 	private JComboBox<Border> comboBoxBorder;
@@ -88,6 +91,7 @@ public class GUI {
 	private JComboBox<String> comboBoxTrackPlayer;
 	private JButton btnRefreshTrackPlayers;
 	private JComboBox<TrackMode> comboBoxTrackMode;
+	private JComboBox<TrackUnit> comboBoxTrackUnit;
 
 	private JButton btnUpdateTrackSettings;
 	private JLabel labelSharing;
@@ -132,7 +136,7 @@ public class GUI {
 		checkBoxCopyToClipboard = new JCheckBox("Copy to clipboard", false);
 		checkBoxShowNames = new JCheckBox("Show Names", false);
 		checkBoxShowBackground = new JCheckBox("Show Map", true);
-		checkBoxAutoBorder = new JCheckBox("Auto border swap", true);
+		checkBoxAutoBorder = new JCheckBox("Auto border swap", false);
 
 		labelBackgroundAlpha = new JLabel("Map Alpha:");
 		sliderBackgroundAlpha = new JSlider(0, 100, 100);
@@ -162,6 +166,7 @@ public class GUI {
 		btnRefreshTrackPlayers = new JButton("Refresh list");
 		comboBoxTrackPlayer = new JComboBox<String>();
 		comboBoxTrackMode = new JComboBox<TrackMode>(trackModeArray);
+		comboBoxTrackUnit = new JComboBox<TrackUnit>(trackUnitArray);
 
 		components.add(btnOverlayWvw);
 		components.add(comboBoxBorder);
@@ -210,7 +215,7 @@ public class GUI {
 
 		components.add(new JLabel("Track mode"));
 		components.add(comboBoxTrackMode);
-		components.add(new JLabel());
+		components.add(comboBoxTrackUnit);
 		components.add(new JLabel());
 
 		components.add(new JLabel());
@@ -379,6 +384,13 @@ public class GUI {
 		comboBoxTrackMode.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				guiOptions.setTrackMode((TrackMode) comboBoxTrackMode
+						.getSelectedItem());
+			}
+		});
+
+		comboBoxTrackUnit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				guiOptions.setTrackUnit((TrackUnit) comboBoxTrackUnit
 						.getSelectedItem());
 			}
 		});

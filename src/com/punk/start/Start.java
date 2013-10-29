@@ -20,11 +20,11 @@ import com.punk.view.GUI;
 
 public class Start {
 
-	// public final static String ip = "83.247.54.28";
+	public final static String ip = "83.247.54.28";
 
 	// public final static String ip = "127.0.0.1";
 
-	public final static String ip = "192.168.2.200";
+	// public final static String ip = "192.168.2.200";
 
 	public static final int API_REFRESH_DELAY = 1000;
 	public static int nextAPICall = API_REFRESH_DELAY / 1000;
@@ -42,6 +42,10 @@ public class Start {
 
 	public enum TrackMode {
 		Camera, Avatar, Map;
+	}
+
+	public enum TrackUnit {
+		Units, Meters, Feet;
 	}
 
 	/**
@@ -108,17 +112,22 @@ public class Start {
 				JSONArray jsonMatchDetails = jGW2API.getWvWMatchDetails(
 						match_id).getJSONArray("maps");
 				// System.err.println(jsonMatchDetails.get(0));
+				int j;
+				j = jsonMatchDetails.get(0).toString().indexOf("objectives\":");
 				JSONArray jsonMatchDetailsBorder1 = new JSONArray(
-						jsonMatchDetails.get(0).toString()
-								.replace("{\"objectives\":", ""));
+						jsonMatchDetails.get(0).toString().substring(j + 12));
+
+				j = jsonMatchDetails.get(1).toString().indexOf("objectives\":");
 				JSONArray jsonMatchDetailsBorder2 = new JSONArray(
-						jsonMatchDetails.get(1).toString()
-								.replace("{\"objectives\":", ""));
+						jsonMatchDetails.get(1).toString().substring(j + 12));
+
+				j = jsonMatchDetails.get(2).toString().indexOf("objectives\":");
 				JSONArray jsonMatchDetailsBorder3 = new JSONArray(
-						jsonMatchDetails.get(2).toString()
-								.replace("{\"objectives\":", ""));
+						jsonMatchDetails.get(2).toString().substring(j + 12));
+
+				j = jsonMatchDetails.get(3).toString().indexOf("objectives\":");
 				JSONArray jsonMatchDetailsEb = new JSONArray(jsonMatchDetails
-						.get(3).toString().replace("{\"objectives\":", ""));
+						.get(3).toString().toString().substring(j + 12));
 
 				// System.out.println("Border red:");
 				for (int i = 0; i < jsonMatchDetailsBorder1.length(); i++) {
