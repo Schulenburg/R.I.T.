@@ -1,5 +1,6 @@
 package com.punk.view;
 
+import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -7,6 +8,7 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -93,10 +95,15 @@ public class GUI {
 	private JComboBox<TrackMode> comboBoxTrackMode;
 	private JComboBox<TrackUnit> comboBoxTrackUnit;
 
+	private JCheckBox checkBoxAnnouncements;
 	private JButton btnUpdateTrackSettings;
 	private JLabel labelSharing;
 
 	private Timer checkGuiOptionsTimer;
+	private Timer autoClickerTimer;
+
+	private Robot robot;
+	private boolean autoClick = false;
 
 	public GUI(CapturepointsUtil capUtil) {
 		overlay = new Overlay(capUtil, Border.EB, Overlay.Type.Icons,
@@ -116,11 +123,21 @@ public class GUI {
 		frame.add(new JLabel(credits), BorderLayout.SOUTH);
 		frame.setVisible(true);
 
+		try {
+			robot = new Robot();
+		} catch (AWTException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		setHotkeys();
 
 		checkGuiOptionsTimer = new Timer();
 		checkGuiOptionsTimer.schedule(new checkGuiOptions(), 0, 5000);
 		btnRefreshTrackPlayers.doClick();
+
+		autoClickerTimer = new Timer();
+		autoClickerTimer.schedule(new autoClickActions(), 0, 25);
 	}
 
 	private void addMenu(JPanel components) {
@@ -161,6 +178,7 @@ public class GUI {
 		txtNickname = new JTextField("");
 		labelNicknameLimit = new JLabel("Optional (5 char max)");
 
+		checkBoxAnnouncements = new JCheckBox("Show announcements", false);
 		labelSharing = new JLabel();
 		btnUpdateTrackSettings = new JButton("Update settings");
 		btnRefreshTrackPlayers = new JButton("Refresh list");
@@ -218,7 +236,7 @@ public class GUI {
 		components.add(comboBoxTrackUnit);
 		components.add(new JLabel());
 
-		components.add(new JLabel());
+		components.add(checkBoxAnnouncements);
 		components.add(btnUpdateTrackSettings);
 		components.add(labelSharing);
 		components.add(new JLabel());
@@ -328,6 +346,15 @@ public class GUI {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				guiOptions.setAutoSwapBorder(checkBoxAutoBorder.isSelected());
+			}
+		});
+
+		checkBoxAnnouncements.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				guiOptions.setShowAnnouncements(checkBoxAnnouncements
+						.isSelected());
 			}
 		});
 
@@ -454,6 +481,8 @@ public class GUI {
 
 		jintel.registerHotKey(9, JIntellitype.MOD_ALT, (int) 'C');
 
+		jintel.registerHotKey(10, JIntellitype.MOD_ALT, (int) 'F');
+
 		jintel.addHotKeyListener(new HotkeyListener() {
 
 			@Override
@@ -502,9 +531,27 @@ public class GUI {
 				case 9:
 					overlay.setWaypointTime(180);
 					break;
+				case 10:
+					autoClick = !autoClick;
 				}
 			}
 		});
+	}
+
+	private class autoClickActions extends TimerTask {
+		public void run() {
+			if (robot != null && autoClick) {
+
+				// robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+				// robot.delay(25);
+				// robot.mouseRelease(InputEvent.BUTTON1_MASK);
+
+				robot.keyPress(KeyEvent.VK_F);
+				robot.delay(200);
+				robot.keyRelease(KeyEvent.VK_F);
+
+			}
+		}
 	}
 
 	private class checkGuiOptions extends TimerTask {

@@ -26,6 +26,8 @@ public class GuiOptions {
 
 	private boolean autoBorderSwap = false;
 
+	private boolean showAnnouncements = false;
+
 	protected GuiOptions() {
 
 	}
@@ -126,6 +128,14 @@ public class GuiOptions {
 
 	public void setAutoSwapBorder(boolean autoBorderSwap) {
 		this.autoBorderSwap = autoBorderSwap;
+	}
+
+	public boolean isShowAnnouncements() {
+		return showAnnouncements;
+	}
+
+	public void setShowAnnouncements(boolean showAnnouncements) {
+		this.showAnnouncements = showAnnouncements;
 	}
 
 }

@@ -69,7 +69,7 @@ public class Overlay extends Thread {
 	private boolean showBackground = true;
 	private boolean copyToClipboard = false;
 
-	private MumbleLink mumbleLink;
+	private MumbleLink mumbleLink = MumbleLink.getInstance();
 
 	private JLabel labelPlayer = new JLabel();
 	private HashMap<String, JLabel> players = new HashMap<String, JLabel>();
@@ -87,6 +87,7 @@ public class Overlay extends Thread {
 	private JPanel waypointTimerPanel = null;
 
 	private NavigationOverlay navOverlay = null;
+	private BroadcastOverlay broadOverlay = null;
 
 	private HashMap<String, double[]> playersInMap = new HashMap<String, double[]>();
 	private String targetPlayer = "";
@@ -96,8 +97,6 @@ public class Overlay extends Thread {
 		this.capUtil = capUtil;
 		this.border = border;
 		this.size = size;
-
-		mumbleLink = new MumbleLink();
 
 		overlayFrame = new JFrame();
 		overlayFrame.setUndecorated(true);
@@ -142,6 +141,8 @@ public class Overlay extends Thread {
 				W32APIOptions.DEFAULT_OPTIONS);
 
 		navOverlay = null;// new NavigationOverlay();
+
+		broadOverlay = BroadcastOverlay.getInstance();
 	}
 
 	public void setTargetPlayer(String targetPlayer) {
@@ -435,7 +436,7 @@ public class Overlay extends Thread {
 
 	private class updateGUI extends TimerTask {
 		public void run() {
-			// updatePlayerLocation();
+			updatePlayerLocation();
 		}
 	}
 
@@ -467,10 +468,8 @@ public class Overlay extends Thread {
 		try {
 			socket = new Socket(Start.ip, 11111);
 		} catch (UnknownHostException uhe) {
-			// Server Host unreachable
 			socket = null;
 		} catch (IOException ioe) {
-			// Cannot connect to port on given server host
 			socket = null;
 		}
 
@@ -636,7 +635,123 @@ public class Overlay extends Thread {
 		}
 		trackPlayer();
 		overlayPanel.repaint();
+		overlayFrame.repaint();
 	}
+
+	// private void handleNetworkLocation(Socket socket, String data) {
+	// guiOptions.setSharingLocation(true);
+	// ObjectInputStream in = null;
+	// PrintWriter out = null;
+	//
+	// try {
+	// in = new ObjectInputStream(socket.getInputStream());
+	// out = new PrintWriter(new OutputStreamWriter(
+	// socket.getOutputStream()));
+	// out.println(data);
+	// out.flush();
+	//
+	// try {
+	// @SuppressWarnings("unchecked")
+	// HashMap<String, JLabel> playersServer = (HashMap<String, JLabel>) in
+	// .readObject();
+	// ArrayList<String> deleteList = new ArrayList<String>();
+	// for (String key : players.keySet()) {
+	// if (!playersServer.containsKey(key)) {
+	// overlayPanel.remove(players.get(key));
+	// deleteList.add(key);
+	// }
+	// }
+	//
+	// for (String key : deleteList) {
+	// players.remove(key);
+	// playersInMap.remove(key);
+	// }
+	//
+	// for (String key : playersServer.keySet()) {
+	// if (!players.containsKey(key)) {
+	// players.put(key, playersServer.get(key));
+	// } else {
+	// players.get(key).setToolTipText(
+	// playersServer.get(key).getToolTipText());
+	// }
+	// }
+	// } catch (ClassNotFoundException e) {
+	// e.printStackTrace();
+	// }
+	// out.println("Quit");
+	// out.flush();
+	// } catch (IOException e) {
+	// e.printStackTrace();
+	// } finally {
+	// try {
+	// out.close();
+	// in.close();
+	// socket.close();
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// }
+	// }
+	//
+	// overlayPanel.remove(labelPlayer);
+	//
+	// for (String key : players.keySet()) {
+	// overlayPanel.remove(players.get(key));
+	// if (Integer
+	// .parseInt(players.get(key).getToolTipText().split(",")[2]) ==
+	// getBorderId()) {
+	// if (players.get(key).getToolTipText().split(",")[5]
+	// .equals(guiOptions.getChannel() + "-"
+	// + mumbleLink.getWorldId() + "-"
+	// + mumbleLink.getTeamColor())) {
+	//
+	// double pX = Double.parseDouble(players.get(key)
+	// .getToolTipText().split(",")[0]);
+	// double pZ = Double.parseDouble(players.get(key)
+	// .getToolTipText().split(",")[1]);
+	//
+	// if (!key.equals(mumbleLink.getCharName())) {
+	// playersInMap.put(key, new double[] { pX, pZ });
+	// }
+	//
+	// int x = (int) (((getWidth()) / getMapWidth()) * pX)
+	// + (getWidth() / 2);
+	// int z = (int) (((getHeight()) / getMapHeight()) * pZ * -1)
+	// + (getHeight() / 2);
+	//
+	// players.get(key).setText(
+	// players.get(key).getToolTipText().split(",")[4]);
+	//
+	// players.get(key).setFont(
+	// new Font(Font.SANS_SERIF, Font.BOLD, 10));
+	//
+	// ImageIcon icon = getProfIcon(Integer.parseInt(players
+	// .get(key).getToolTipText().split(",")[3]));
+	//
+	// players.get(key)
+	// .setIcon(
+	// new ImageIcon(
+	// icon.getImage()
+	// .getScaledInstance(
+	// (int) (Resources.IMAGE_COMMANDER
+	// .getIconWidth() * getSizeMultiplier()),
+	// (int) (Resources.IMAGE_COMMANDER
+	// .getIconHeight() * getSizeMultiplier()),
+	// Image.SCALE_SMOOTH)));
+	//
+	// overlayPanel.add(players.get(key));
+	// overlayPanel.setComponentZOrder(players.get(key), 0);
+	// overlayPanelSpringLayout.putConstraint(
+	// SpringLayout.HORIZONTAL_CENTER, players.get(key),
+	// x, SpringLayout.WEST, overlayPanel);
+	// overlayPanelSpringLayout.putConstraint(SpringLayout.NORTH,
+	// players.get(key), z, SpringLayout.NORTH,
+	// overlayPanel);
+	// }
+	// }
+	// }
+	// trackPlayer();
+	// overlayPanel.repaint();
+	// }
 
 	private void trackPlayer() {
 		double targetX = 0;

@@ -3,8 +3,16 @@ package com.punk.start;
 import jGW2API.jGW2API;
 
 import java.awt.Color;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,13 +28,12 @@ import com.punk.view.GUI;
 
 public class Start {
 
-	public final static String ip = "83.247.54.28";
+	private static double version = 1.12;
+	// TODO get version from server and check, if lower < server then give link
 
-	// public final static String ip = "127.0.0.1";
+	public static String ip = "83.247.54.28";
 
-	// public final static String ip = "192.168.2.200";
-
-	public static final int API_REFRESH_DELAY = 1000;
+	public static int API_REFRESH_DELAY = 15000;
 	public static int nextAPICall = API_REFRESH_DELAY / 1000;
 
 	private static final String SERVERNAME = "far shiverpeaks";
@@ -56,6 +63,58 @@ public class Start {
 	 */
 	public static void main(String[] args) throws IOException {
 		Resources.load();
+
+		URL myIP = new URL("http://api.externalip.net/ip/");
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				myIP.openStream()));
+		if (ip.equals(br.readLine())) {
+			ip = "127.0.0.1";
+			// ip = "192.168.2.200";
+			API_REFRESH_DELAY = 1000;
+			nextAPICall = API_REFRESH_DELAY / 1000;
+		}
+
+		Socket socket = null;
+
+		try {
+			socket = new Socket(ip, 11111);
+
+		} catch (UnknownHostException uhe) {
+			// Server Host unreachable
+			socket = null;
+		} catch (IOException ioe) {
+			// Cannot connect to port on given server host
+			socket = null;
+		}
+
+		if (socket != null) {
+			ObjectInputStream in = null;
+			PrintWriter out = null;
+
+			try {
+				in = new ObjectInputStream(socket.getInputStream());
+				out = new PrintWriter(new OutputStreamWriter(
+						socket.getOutputStream()));
+				out.println("version");
+				out.flush();
+
+				double serverVersion = in.readDouble();
+				System.out.println(serverVersion + "");
+				// TODO check version, give link if lower
+				out.println("Quit");
+				out.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					out.close();
+					in.close();
+					socket.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
 		capUtil = new CapturepointsUtil();
 

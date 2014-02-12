@@ -12,6 +12,8 @@ import com.sun.jna.platform.win32.WinNT.HANDLE;
 
 public class MumbleLink {
 
+	private static MumbleLink instance = null;
+
 	private final HANDLE sharedFile;
 
 	private int uiVersion;
@@ -26,7 +28,7 @@ public class MumbleLink {
 	private char[] identity;
 	private int context_len;
 	private byte[] context;
-	private char[] description;
+	private byte[] description;
 
 	private String charName;
 	private int profession;
@@ -35,7 +37,7 @@ public class MumbleLink {
 	private int teamColor;
 	private boolean isCommander;
 
-	public MumbleLink() {
+	protected MumbleLink() {
 		final String name = "MumbleLink";
 
 		sharedFile = Kernel32.INSTANCE.CreateFileMapping(
@@ -44,6 +46,13 @@ public class MumbleLink {
 
 		Timer timer = new Timer();
 		timer.schedule(new updateMumbleLink(), 0, 1000);
+	}
+
+	public static MumbleLink getInstance() {
+		if (instance == null) {
+			instance = new MumbleLink();
+		}
+		return instance;
 	}
 
 	private class updateMumbleLink extends TimerTask {
@@ -96,7 +105,7 @@ public class MumbleLink {
 
 				}
 			}
-			description = sharedMemory.getCharArray(1620, 2048);
+			description = sharedMemory.getByteArray(1620, 2048);
 			// print();
 		}
 	}
@@ -114,10 +123,10 @@ public class MumbleLink {
 		// System.out.println("fCameraFront " + Arrays.toString(fCameraFront));
 		// System.out.println("fCameraTop " + Arrays.toString(fCameraTop));
 		// System.out.println("identity " + Arrays.toString(identity));
-		// System.out.println("context_len " + context_len);
+		System.out.println("context_len " + context_len);
 		System.out.println("context " + Arrays.toString(context));
-		// System.out
-		// .println("description " + Arrays.toString(description) + "\n");
+		System.out
+				.println("description " + Arrays.toString(description) + "\n");
 	}
 
 	public char[] getName() {
@@ -168,7 +177,7 @@ public class MumbleLink {
 		return context;
 	}
 
-	public char[] getDescription() {
+	public byte[] getDescription() {
 		return description;
 	}
 

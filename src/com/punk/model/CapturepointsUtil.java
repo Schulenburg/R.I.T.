@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.punk.connection.Connection;
 import com.punk.start.Start.Border;
 
 /**
@@ -34,70 +35,8 @@ public class CapturepointsUtil {
 		capturePoints.put(Border.GREEN, capturePointsGreen);
 		capturePoints.put(Border.BLUE, capturePointsBlue);
 
-		// Socket socket = null;
-		//
-		// try {
-		// socket = new Socket(Start.ip, 11111);
-		//
-		// } catch (UnknownHostException uhe) {
-		// // Server Host unreachable
-		// socket = null;
-		// } catch (IOException ioe) {
-		// // Cannot connect to port on given server host
-		// socket = null;
-		// }
-		//
-		// if (socket != null) {
-		// ObjectInputStream in = null;
-		// PrintWriter out = null;
-		//
-		// try {
-		// in = new ObjectInputStream(socket.getInputStream());
-		// out = new PrintWriter(new OutputStreamWriter(
-		// socket.getOutputStream()));
-		// out.println("data");
-		// out.flush();
-		//
-		// try {
-		// @SuppressWarnings("unchecked")
-		// Map<Integer, Map<Integer, Integer>> capturepoints = (Map<Integer,
-		// Map<Integer, Integer>>) in
-		// .readObject();
-		//
-		// for (int i : capturepoints.get(1).keySet()) {
-		// capturePointsEB.get(i).setRiTime(
-		// capturepoints.get(1).get(i));
-		// }
-		// for (int i : capturepoints.get(2).keySet()) {
-		// capturePointsRed.get(i).setRiTime(
-		// capturepoints.get(2).get(i));
-		// }
-		// for (int i : capturepoints.get(3).keySet()) {
-		// capturePointsBlue.get(i).setRiTime(
-		// capturepoints.get(3).get(i));
-		// }
-		// for (int i : capturepoints.get(4).keySet()) {
-		// capturePointsGreen.get(i).setRiTime(
-		// capturepoints.get(4).get(i));
-		// }
-		//
-		// } catch (ClassNotFoundException e) {
-		// e.printStackTrace();
-		// }
-		// out.println("Quit");
-		// out.flush();
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// } finally {
-		// try {
-		// out.close();
-		// in.close();
-		// socket.close();
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		// }
-		// }
+		Connection.getInstance().getTimers(capturePoints);
+
 	}
 
 	public ArrayList<Capturepoint> getCapturepoints(Border border) {

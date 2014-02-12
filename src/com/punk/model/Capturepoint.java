@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 
 import com.punk.resources.Resources;
 import com.punk.start.Start;
+import com.punk.view.BroadcastOverlay;
 import com.punk.view.RichJLabel;
 
 /**
@@ -100,8 +101,12 @@ public class Capturepoint implements Serializable {
 
 		if (riTime > 0) {
 			riTime = riTime - 1;
-		}
+			if (riTime == 0) {
+				BroadcastOverlay.getInstance().pushMessage(
+						getName() + " is available for capture.");
+			}
 
+		}
 		labelOverlayTimer.setText(getTimeAsString(riTime));
 
 		if (labelOverlayTimer.getForeground() != server) {
@@ -210,6 +215,11 @@ public class Capturepoint implements Serializable {
 	public void flip(Color server) {
 		this.server = server;
 		riTime = 300 - riBufferTime;
+		if (!isBloodlust()) {
+			BroadcastOverlay.getInstance().pushMessage(
+					getName() + " is captured by ..."); // TODO get color and
+														// servername
+		}
 	}
 
 	public void createOverlay(boolean showNames, double scale) {
